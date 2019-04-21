@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+
+  mariadb:
+    image: mariadb:latest
+    restart: always
+    ports:
+    - 3306:3306/tcp
+    environment:
+    - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    - MYSQL_DATABASE=cineworld
+    - MYSQL_USER_FILE=/run/secrets/MySqlCineworldUser
+    - MYSQL_PASSWORD_FILE=/run/secrets/MySqlCineworldPassword
+    volumes:
+    - mariadb-volume:/var/lib/mysql:rw
+    secrets:
+    - source: MySqlCineworldUser
+    - source: MySqlCineworldPassword
+ 
+  cineworldservice:
+    image: eassbhhtgu/movietimes-cineworldservice:latest
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Production
+    secrets:
+    - source: MySqlCineworldUser
+    - source: MySqlCineworldPassword
+
+secrets:
+  MySqlCineworldUser:
+    external: true
+    name: MySqlCineworldUser
+  MySqlCineworldPassword:
+    external: true
+    name: MySqlCineworldPassword
+
+volumes:
+  mariadb-volume: {}
