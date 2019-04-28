@@ -5,6 +5,9 @@ using Microsoft.Extensions.Options;
 using MovieTimes.CineworldService.Models.Generated;
 using MovieTimes.CineworldService.Models.Helpers;
 using MySql.Data.MySqlClient;
+using OpenTracing;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,14 +17,17 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 	public class CineworldRepository : ICineworldRepository
 	{
 		private readonly ILogger<CineworldRepository> _logger;
+		private readonly ITracer _tracer;
 		private readonly IDbConnection _connection;
 
 		public CineworldRepository(
 			ILogger<CineworldRepository> logger,
+			ITracer tracer,
 			IOptions<Configuration.DbSettings> dbSettingsOptions,
 			IOptions<Configuration.DockerSecrets> dockerSecretsOptions)
 		{
 			_logger = Guard.Argument(() => logger).NotNull().Value;
+			_tracer = Guard.Argument(() => tracer).NotNull().Value;
 
 			Guard.Argument(() => dbSettingsOptions, secure: true).NotNull();
 			var dbSettings = Guard.Argument(() => dbSettingsOptions.Value, secure: true).NotNull().Value;
@@ -81,7 +87,7 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 			{
 				Task<int> Do(string sql, object param = default)
 				{
-					return _connection.ExecuteAsync(sql, param, transaction, commandTimeout: 18_000, commandType: CommandType.Text);
+					return _connection.ExecuteAsync(sql, param, transaction, commandTimeout: 60, commandType: CommandType.Text);
 				}
 
 				try
@@ -135,27 +141,37 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 
 		private void Connect()
 		{
-			var count = 0;
-
-			do
+			using (var scope = _tracer.BuildSpan($"{nameof(CineworldRepository)}.{nameof(Connect)}")
+				.WithTag(nameof(Connected), Connected)
+				.StartActive(finishSpanOnDispose: true))
 			{
-				_logger.LogInformation("Current DB connection state: {0:F}", _connection.State);
+				var count = 0;
 
-				if (Connected)
+				do
 				{
-					_logger.LogInformation("Connected to DB after {0:D} attempt(s)", count);
-					return;
+
+					_logger.LogInformation("Current DB connection state: {0:F}", _connection.State);
+
+					if (Connected)
+					{
+						_logger.LogInformation("Connected to DB after {0:D} attempt(s)", count);
+						return;
+					}
+
+					_logger.LogInformation("Connecting to DB: attempt {0:D}", count);
+					scope.Span.Log(new Dictionary<string, object>(1) { { "attempt" + (count + 1), _connection.State }, });
+
+					_connection.Open();
+
+					System.Threading.Thread.Sleep(millisecondsTimeout: 3_000);
 				}
+				while (++count <= 10);
 
-				_logger.LogInformation("Connecting to DB: attempt {0:D}", count);
-
-				_connection.Open();
-
-				System.Threading.Thread.Sleep(millisecondsTimeout: 3_000);
+				var exception = new Exception("Failed to connect to DB");
+				_logger.LogCritical(exception, exception.Message);
+				scope.Span.Log(new Dictionary<string, object>(1) { { nameof(exception), exception }, });
+				throw exception;
 			}
-			while (++count <= 10);
-
-			_logger.LogCritical("Failed to connect to DB");
 		}
 
 		private Task Deploy()

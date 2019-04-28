@@ -1,6 +1,7 @@
 ﻿using Dawn;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenTracing;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -13,9 +14,10 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 
 		public CineworldClient(
 			ILogger<CineworldClient> logger,
+			ITracer tracer,
 			IHttpClientFactory httpClientFactory,
 			IOptions<Configuration.Uris> urisOptions)
-			: base(logger, httpClientFactory)
+			: base(logger, tracer, httpClientFactory)
 		{
 			Guard.Argument(() => urisOptions).NotNull();
 			Guard.Argument(() => urisOptions.Value).NotNull();

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using MovieTimes.CineworldService.Clients.Concrete;
+using OpenTracing;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -19,6 +20,8 @@ namespace MovieTimes.CineworldService.Clients.Tests
 
 			var logger = Mock.Of<ILogger<CineworldClient>>();
 
+			var tracer = Mock.Of<ITracer>();
+
 			var httpClientFactoryMock = new Mock<IHttpClientFactory>();
 
 			httpClientFactoryMock
@@ -29,7 +32,7 @@ namespace MovieTimes.CineworldService.Clients.Tests
 
 			var urisOptions = Mock.Of<IOptions<Configuration.Uris>>(o => o.Value == uris);
 
-			_cineworldClient = new CineworldClient(logger, httpClientFactoryMock.Object, urisOptions);
+			_cineworldClient = new CineworldClient(logger, tracer, httpClientFactoryMock.Object, urisOptions);
 		}
 
 		[Theory]

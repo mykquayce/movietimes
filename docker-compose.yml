@@ -2,9 +2,13 @@ version: '3.7'
 
 services:
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+    - 16686:16686/tcp
+
   mariadb:
     image: mariadb:latest
-    restart: always
     ports:
     - 3306:3306/tcp
     environment:
@@ -22,6 +26,9 @@ services:
     image: eassbhhtgu/movietimes-cineworldservice:latest
     environment:
     - ASPNETCORE_ENVIRONMENT=Production
+    depends_on:
+    - jaeger
+    - mariadb
     secrets:
     - source: MySqlCineworldUser
     - source: MySqlCineworldPassword

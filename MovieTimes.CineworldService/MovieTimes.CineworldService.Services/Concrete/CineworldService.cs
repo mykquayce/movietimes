@@ -1,7 +1,10 @@
 ﻿using Dawn;
 using Microsoft.Extensions.Logging;
 using MovieTimes.CineworldService.Models.Generated;
+using MovieTimes.CineworldService.Models.Helpers;
+using OpenTracing;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,14 +15,17 @@ namespace MovieTimes.CineworldService.Services.Concrete
 	public class CineworldService : ICineworldService
 	{
 		private readonly ILogger<CineworldService> _logger;
+		private readonly ITracer _tracer;
 		private readonly Clients.ICineworldClient _cineworldClient;
 		private readonly XmlSerializer _xmlSerializer;
 
 		public CineworldService(
 			ILogger<CineworldService> logger,
+			ITracer tracer,
 			Clients.ICineworldClient cineworldClient)
 		{
 			_logger = Guard.Argument(() => logger).NotNull().Value;
+			_tracer = Guard.Argument(() => tracer).NotNull().Value;
 			_cineworldClient = Guard.Argument(() => cineworldClient).NotNull().Value;
 
 			_xmlSerializer = new XmlSerializer(typeof(cinemas));
@@ -27,27 +33,49 @@ namespace MovieTimes.CineworldService.Services.Concrete
 
 		public async Task<cinemas> GetCinemasAsync()
 		{
-			cinemas cinemas;
-			var xml = await _cineworldClient.GetListingsAsync();
-
-			_logger.LogDebug("{0}={1}", nameof(xml), xml?.Substring(0, 100));
-
-			using (var reader = new StringReader(xml))
+			using (var scope = _tracer.BuildSpan($"{nameof(CineworldService)}.{nameof(GetCinemasAsync)}")
+				.StartActive(finishSpanOnDispose: true))
 			{
-				try
+				cinemas cinemas;
+				var xml = await _cineworldClient.GetListingsAsync();
+
+				Log((nameof(xml), xml.Truncate()));
+
+				using (var reader = new StringReader(xml))
 				{
-					cinemas = (cinemas)_xmlSerializer.Deserialize(reader);
+					try
+					{
+						cinemas = (cinemas)_xmlSerializer.Deserialize(reader);
+					}
+					catch (Exception ex)
+					{
+						Log((nameof(ex), ex), (nameof(xml), xml.Truncate()));
+						_logger.LogCritical(ex, "{0}={1}", nameof(xml), xml.Truncate());
+						return default;
+					}
 				}
-				catch (Exception ex)
-				{
-					_logger.LogCritical(ex, "{0}={1}", nameof(xml), xml?.Substring(0, 100));
-					return default;
-				}
+
+				var (cinemaCount, filmCount, showCount) = cinemas.GetCounts();
+
+				Log(
+					(nameof(cinemaCount), cinemaCount),
+					(nameof(filmCount), filmCount),
+					(nameof(showCount), showCount)
+					);
+
+				return cinemas;
 			}
+		}
 
-			_logger.LogDebug("{0} {1}(s), {2} {3}(s)", cinemas.cinema?.Count ?? 0, nameof(cinema), cinemas.cinema?.Aggregate(0, (seed, c) => seed += c?.listing?.Count ?? 0) ?? 0, nameof(film));
+		public void Log(params (string name, object value)[] values) => Log(values.ToDictionary(t => t.name, t => t.value));
 
-			return cinemas;
+		public void Log(IDictionary<string, object> dictionary)
+		{
+			var message = string.Join(", ", dictionary.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+
+			_logger?.LogInformation(message);
+
+			_tracer?.ActiveSpan?.Log(dictionary);
 		}
 	}
 }
