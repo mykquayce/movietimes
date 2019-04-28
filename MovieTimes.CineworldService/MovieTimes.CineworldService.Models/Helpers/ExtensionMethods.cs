@@ -1,4 +1,5 @@
 ﻿using MovieTimes.CineworldService.Models.Generated;
+using Newtonsoft.Json;
 using System;
 using System.Linq;
 
@@ -15,5 +16,22 @@ namespace MovieTimes.CineworldService.Models.Helpers
 		}
 
 		public static string Truncate(this string s) => s?.Substring(0, Math.Min(s.Length, 100)) ?? string.Empty;
+
+		public static string ToJsonString(this object value)
+		{
+			if (value == default)
+			{
+				return string.Empty;
+			}
+
+			try
+			{
+				return JsonConvert.SerializeObject(value);
+			}
+			catch
+			{
+				return JsonConvert.SerializeObject(new { value = value.ToString(), });
+			}
+		}
 	}
 }

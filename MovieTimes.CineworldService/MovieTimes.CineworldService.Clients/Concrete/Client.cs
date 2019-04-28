@@ -1,7 +1,6 @@
 ﻿using Dawn;
 using Microsoft.Extensions.Logging;
 using MovieTimes.CineworldService.Models.Helpers;
-using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -72,26 +71,6 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 			_logger.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(responseStatusCode), responseStatusCode, nameof(responseContent), responseContent.Truncate(), nameof(responseHeaders), responseHeaders?.ToJsonString());
 
 			return (responseStatusCode, responseContent, responseHeaders);
-		}
-	}
-
-	public static class ExtensionMethods
-	{
-		public static string ToJsonString(this object value)
-		{
-			if (value == default)
-			{
-				return string.Empty;
-			}
-
-			try
-			{
-				return JsonConvert.SerializeObject(value);
-			}
-			catch
-			{
-				return string.Empty;
-			}
 		}
 	}
 }
