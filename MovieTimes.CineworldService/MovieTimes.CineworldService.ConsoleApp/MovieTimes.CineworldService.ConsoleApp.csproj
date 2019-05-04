@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dawn.Guard" Version="1.8.0" />
-    <PackageReference Include="DockerSecretsConfiguration" Version="1.0.4" />
+    <PackageReference Include="Helpers.DockerSecrets" Version="1.0.0" />
     <PackageReference Include="Jaeger" Version="0.3.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
