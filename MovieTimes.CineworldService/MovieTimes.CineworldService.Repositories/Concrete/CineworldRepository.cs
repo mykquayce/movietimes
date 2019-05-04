@@ -18,7 +18,8 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 	{
 		private readonly ILogger<CineworldRepository> _logger;
 		private readonly ITracer _tracer;
-		private readonly IDbConnection _connection;
+		private IDbConnection _connection;
+		private readonly string _connectionString;
 
 		public CineworldRepository(
 			ILogger<CineworldRepository> logger,
@@ -26,46 +27,44 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 			IOptions<Configuration.DbSettings> dbSettingsOptions,
 			IOptions<Configuration.DockerSecrets> dockerSecretsOptions)
 		{
-			_logger = Guard.Argument(() => logger).NotNull().Value;
 			_tracer = Guard.Argument(() => tracer).NotNull().Value;
 
-			Guard.Argument(() => dbSettingsOptions, secure: true).NotNull();
-			var dbSettings = Guard.Argument(() => dbSettingsOptions.Value, secure: true).NotNull().Value;
-
-			Guard.Argument(() => dbSettings, secure: true)
-				.NotNull()
-				.Require(s => !string.IsNullOrWhiteSpace(s.Server))
-				.Require(s => s.Port > 0)
-				.Require(s => !string.IsNullOrWhiteSpace(s.Database));
-
-			Guard.Argument(() => dockerSecretsOptions, secure: true).NotNull();
-
-			var dockerSecrets = dockerSecretsOptions.Value;
-
-			var server = dbSettings.Server;
-			var port = dbSettings.Port;
-			var userId = dockerSecrets.MySqlCineworldUser ?? dbSettings.UserId;
-			var password = dockerSecrets.MySqlCineworldPassword ?? dbSettings.Password;
-			var database = dbSettings.Database;
-
-			Guard.Argument(() => userId, secure: true).NotNull().NotEmpty().NotWhiteSpace();
-			Guard.Argument(() => password, secure: true).NotNull().NotEmpty().NotWhiteSpace();
-
-			var connectionString = $"server={server};port={port:D};user id={userId};password={password};database={database};";
-
-			_connection = new MySqlConnection(connectionString);
-
-			Connect();
-
-			if (!Connected)
+			using (var scope = _tracer.BuildDefaultSpan()
+				.StartActive(finishSpanOnDispose: true))
 			{
-				return;
-			}
+				_logger = Guard.Argument(() => logger).NotNull().Value;
 
-			Deploy();
+				Guard.Argument(() => dbSettingsOptions, secure: true).NotNull();
+				var dbSettings = Guard.Argument(() => dbSettingsOptions.Value, secure: true).NotNull().Value;
+
+				Guard.Argument(() => dbSettings, secure: true)
+					.NotNull()
+					.Require(s => !string.IsNullOrWhiteSpace(s.Server))
+					.Require(s => s.Port > 0)
+					.Require(s => !string.IsNullOrWhiteSpace(s.Database));
+
+				Guard.Argument(() => dockerSecretsOptions, secure: true).NotNull();
+
+				var dockerSecrets = dockerSecretsOptions.Value;
+
+				var server = dbSettings.Server;
+				var port = dbSettings.Port;
+				var userId = dockerSecrets.MySqlCineworldUser ?? dbSettings.UserId;
+				var password = dockerSecrets.MySqlCineworldPassword ?? dbSettings.Password;
+				var database = dbSettings.Database;
+
+				Guard.Argument(() => userId, secure: true).NotNull().NotEmpty().NotWhiteSpace();
+				Guard.Argument(() => password, secure: true).NotNull().NotEmpty().NotWhiteSpace();
+
+				_connectionString = $"server={server};port={port:D};user id={userId};password={password};database={database};";
+
+				Connect();
+
+				Deploy();
+			}
 		}
 
-		private bool Connected => (_connection.State & ConnectionState.Open) != 0;
+		private bool Connected => _connection != default && (_connection.State & ConnectionState.Open) != 0;
 
 		public Task SaveCinemasAsync(cinemas cinemas)
 		{
@@ -73,17 +72,9 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 
 			_logger.LogInformation("Saving {0:D} {1}(s), {2:D} {3}(s), {4:D} {5}(s)", cinemaCount, nameof(cinema), filmCount, nameof(film), showCount, nameof(show));
 
-			Connect();
+			CheckConnection();
 
-			if (!Connected)
-			{
-				_logger.LogCritical("DB was inaccessible");
-				return Task.CompletedTask;
-			}
-
-			IDbTransaction transaction;
-
-			using (transaction = _connection.BeginTransaction())
+			using (var transaction = _connection.BeginTransaction())
 			{
 				Task<int> Do(string sql, object param = default)
 				{
@@ -139,12 +130,32 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 			return Task.CompletedTask;
 		}
 
+		private void CheckConnection()
+		{
+			try
+			{
+				var now = _connection.ExecuteScalar("SELECT NOW();");
+			}
+			catch (MySqlException ex)
+				when (string.Equals(ex.Message, "Fatal error encountered during command execution.", StringComparison.InvariantCultureIgnoreCase)
+					&& ex?.InnerException is System.IO.IOException
+					&& string.Equals(ex.InnerException.Message, "Unable to write data to the transport connection: Connection reset by peer.", StringComparison.InvariantCultureIgnoreCase))
+			{
+				Connect();
+			}
+		}
+
 		private void Connect()
 		{
-			using (var scope = _tracer.BuildSpan($"{nameof(CineworldRepository)}.{nameof(Connect)}")
+			using (var scope = _tracer.BuildDefaultSpan()
 				.WithTag(nameof(Connected), Connected)
 				.StartActive(finishSpanOnDispose: true))
 			{
+				if (_connection == null)
+				{
+					_connection = new MySqlConnection(_connectionString);
+				}
+
 				var count = 0;
 
 				do
@@ -159,7 +170,8 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 					}
 
 					_logger.LogInformation("Connecting to DB: attempt {0:D}", count);
-					scope.Span.Log(new Dictionary<string, object>(1) { { "attempt" + (count + 1), _connection.State }, });
+					scope.Span.Log(
+						"attempt" + (count + 1), _connection.State);
 
 					_connection.Open();
 
@@ -169,7 +181,8 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 
 				var exception = new Exception("Failed to connect to DB");
 				_logger.LogCritical(exception, exception.Message);
-				scope.Span.Log(new Dictionary<string, object>(1) { { nameof(exception), exception }, });
+				scope.Span.Log(
+					nameof(exception), exception);
 				throw exception;
 			}
 		}
@@ -179,9 +192,9 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 			_logger.LogInformation("Deploying DB");
 
 			return Task.WhenAll(
-				DeployTable("cinema", Properties.Resources.cinema),
-				DeployTable("film", Properties.Resources.film),
-				DeployTable("show", Properties.Resources.show));
+				DeployTable(nameof(Properties.Resources.cinema), Properties.Resources.cinema),
+				DeployTable(nameof(Properties.Resources.film),   Properties.Resources.film),
+				DeployTable(nameof(Properties.Resources.show),   Properties.Resources.show));
 		}
 
 		private async Task DeployTable(string tableName, string sql)
