@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OpenTracing;
 using System;
 using System.Net.Http;
@@ -97,32 +96,6 @@ namespace MovieTimes.CineworldService.ConsoleApp
 				});
 
 			return builder.RunConsoleAsync();
-		}
-	}
-	public static class ExtensionMethods
-	{
-		public static IServiceCollection AddJaegerTracing(this IServiceCollection services, string serviceName, string host = "localhost", int port = 6831)
-		{
-			if (string.IsNullOrWhiteSpace(serviceName)) throw new ArgumentNullException(nameof(serviceName));
-
-			var sender = new UdpSender(host, port, maxPacketSize: 0);
-
-			var reporter = new RemoteReporter.Builder()
-				.WithSender(sender)
-				.Build();
-
-			var sampler = new ConstSampler(sample: true);
-
-			var tracer = new Tracer.Builder(serviceName)
-				.WithReporter(reporter)
-				.WithSampler(sampler)
-				.Build();
-
-			services
-				.AddOpenTracing()
-				.AddSingleton<ITracer>(tracer);
-
-			return services;
 		}
 	}
 }

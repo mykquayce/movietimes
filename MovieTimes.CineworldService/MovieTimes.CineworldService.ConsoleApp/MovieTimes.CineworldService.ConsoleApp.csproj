@@ -8,8 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="Dawn.Guard" Version="1.8.0" />
-    <PackageReference Include="Helpers.DockerSecrets" Version="1.0.0" />
-    <PackageReference Include="Jaeger" Version="0.3.2" />
+    <PackageReference Include="Helpers.DockerSecrets" Version="1.0.1" />
+    <PackageReference Include="Helpers.Jaeger" Version="1.0.0" />
+    <PackageReference Include="Helpers.Tracing" Version="1.0.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
@@ -17,7 +18,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="2.2.0" />
-    <PackageReference Include="OpenTracing.Contrib.NetCore" Version="0.5.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using Dawn;
+using Helpers.Tracing;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -31,29 +32,25 @@ namespace MovieTimes.CineworldService.ConsoleApp
 			Services.ICineworldService cineworldService,
 			Repositories.ICineworldRepository cineworldRepository)
 		{
-			using (var scope = tracer.BuildSpan($"{nameof(HostedService)}.ctor")
-				.StartActive(finishSpanOnDispose: true))
+			_logger = Guard.Argument(() => logger).NotNull().Value;
+			_tracer = Guard.Argument(() => tracer).NotNull().Value;
+
+			Guard.Argument(() => settingsOptions).NotNull();
+			Guard.Argument(() => settingsOptions.Value).NotNull();
+			Guard.Argument(() => settingsOptions.Value.IntervalMS).InRange(1, 86_400_000);
+
+			_cineworldClient = Guard.Argument(() => cineworldClient).NotNull().Value;
+			_cineworldService = Guard.Argument(() => cineworldService).NotNull().Value;
+			_cineworldRepository = Guard.Argument(() => cineworldRepository).NotNull().Value;
+
+			_timer = new System.Timers.Timer
 			{
-				_logger = Guard.Argument(() => logger).NotNull().Value;
-				_tracer = Guard.Argument(() => tracer).NotNull().Value;
+				AutoReset = true,
+				Enabled = true,
+				Interval = settingsOptions.Value.IntervalMS,
+			};
 
-				Guard.Argument(() => settingsOptions).NotNull();
-				Guard.Argument(() => settingsOptions.Value).NotNull();
-				Guard.Argument(() => settingsOptions.Value.IntervalMS).InRange(1, 86_400_000);
-
-				_cineworldClient = Guard.Argument(() => cineworldClient).NotNull().Value;
-				_cineworldService = Guard.Argument(() => cineworldService).NotNull().Value;
-				_cineworldRepository = Guard.Argument(() => cineworldRepository).NotNull().Value;
-
-				_timer = new System.Timers.Timer
-				{
-					AutoReset = true,
-					Enabled = true,
-					Interval = settingsOptions.Value.IntervalMS,
-				};
-
-				_timer.Elapsed += OnTimedEventAsync;
-			}
+			_timer.Elapsed += OnTimedEventAsync;
 
 			OnTimedEventAsync(this, default);
 		}
@@ -61,7 +58,7 @@ namespace MovieTimes.CineworldService.ConsoleApp
 		private async void OnTimedEventAsync(object sender, ElapsedEventArgs e)
 		{
 			using (var scope = _tracer
-				.BuildSpan($"{nameof(HostedService)}.{nameof(OnTimedEventAsync)}")
+				.BuildDefaultSpan()
 				.WithTag(nameof(_lastModified), _lastModified.ToString("O"))
 				.StartActive())
 			{

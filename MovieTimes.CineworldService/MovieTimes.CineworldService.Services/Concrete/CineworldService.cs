@@ -1,4 +1,5 @@
 ﻿using Dawn;
+using Helpers.Tracing;
 using Microsoft.Extensions.Logging;
 using MovieTimes.CineworldService.Models.Generated;
 using MovieTimes.CineworldService.Models.Helpers;
@@ -22,16 +23,12 @@ namespace MovieTimes.CineworldService.Services.Concrete
 			ITracer tracer,
 			Clients.ICineworldClient cineworldClient)
 		{
+			_logger = Guard.Argument(() => logger).NotNull().Value;
 			_tracer = Guard.Argument(() => tracer).NotNull().Value;
 
-			using (var scope = tracer.BuildDefaultSpan()
-				.StartActive(finishSpanOnDispose: true))
-			{
-				_logger = Guard.Argument(() => logger).NotNull().Value;
-				_cineworldClient = Guard.Argument(() => cineworldClient).NotNull().Value;
+			_cineworldClient = Guard.Argument(() => cineworldClient).NotNull().Value;
 
-				_xmlSerializer = new XmlSerializer(typeof(cinemas));
-			}
+			_xmlSerializer = new XmlSerializer(typeof(cinemas));
 		}
 
 		public async Task<cinemas> GetCinemasAsync()

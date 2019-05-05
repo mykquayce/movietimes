@@ -1,9 +1,9 @@
 ﻿using Dawn;
+using Helpers.Tracing;
 using Microsoft.Extensions.Logging;
 using MovieTimes.CineworldService.Models.Helpers;
 using OpenTracing;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -71,7 +71,7 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 				}
 				catch (Exception ex)
 				{
-					scope.Span.Log(new Dictionary<string, object>(1) { { nameof(ex), ex.ToJsonString() }, });
+					scope.Span.Log(nameof(ex), ex.ToJsonString());
 
 					_logger.LogCritical(ex, "{0}={1}, {2}={3}, {4}={5}", nameof(httpMethod), httpMethod.Method, nameof(relativeUri), relativeUri.OriginalString, nameof(body), body);
 					return default;
@@ -81,12 +81,10 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 				var responseContent = await httpResponseMessage.Content?.ReadAsStringAsync();
 				var responseHeaders = httpResponseMessage.Content?.Headers;
 
-				scope.Span.Log(new Dictionary<string, object>(3)
-				{
-					{ nameof(responseStatusCode), responseStatusCode },
-					{ nameof(responseContent), responseContent },
-					{ nameof(responseHeaders), responseHeaders?.ToJsonString() },
-				});
+				scope.Span.Log(
+					nameof(responseStatusCode), responseStatusCode,
+					nameof(responseContent), responseContent,
+					nameof(responseHeaders), responseHeaders?.ToJsonString());
 
 				_logger.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(responseStatusCode), responseStatusCode, nameof(responseContent), responseContent.Truncate(), nameof(responseHeaders), responseHeaders?.ToJsonString());
 
