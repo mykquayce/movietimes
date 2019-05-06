@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.CineworldService.Models.Tests", "MovieTimes.CineworldService.Models.Tests\MovieTimes.CineworldService.Models.Tests.csproj", "{5957385B-4D63-4E3F-9DC0-3A1FEA1A668C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{119BD0FC-3EE3-43C3-9A7E-EF55E45FB225}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{119BD0FC-3EE3-43C3-9A7E-EF55E45FB225}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{119BD0FC-3EE3-43C3-9A7E-EF55E45FB225}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5957385B-4D63-4E3F-9DC0-3A1FEA1A668C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5957385B-4D63-4E3F-9DC0-3A1FEA1A668C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5957385B-4D63-4E3F-9DC0-3A1FEA1A668C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5957385B-4D63-4E3F-9DC0-3A1FEA1A668C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

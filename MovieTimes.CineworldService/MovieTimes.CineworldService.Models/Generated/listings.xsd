@@ -14,12 +14,7 @@
         <xs:element ref="listing"/>
       </xs:sequence>
       <xs:attribute type="xs:string" name="name" use="required"/>
-      <xs:attribute type="xs:anyURI" name="root" use="required"/>
-      <xs:attribute type="xs:string" name="url" use="required"/>
       <xs:attribute type="xs:short" name="id" use="required"/>
-      <xs:attribute type="xs:string" name="phone" use="required"/>
-      <xs:attribute type="xs:string" name="address" use="required"/>
-      <xs:attribute type="xs:string" name="postcode" use="required"/>
     </xs:complexType>
   </xs:element>
 
@@ -37,10 +32,7 @@
         <xs:element ref="shows"/>
       </xs:sequence>
       <xs:attribute type="xs:string" name="title" use="required"/>
-      <xs:attribute type="xs:string" name="rating" use="required"/>
-      <xs:attribute type="xs:string" name="url" use="required"/>
       <xs:attribute type="xs:int" name="edi" use="required"/>
-      <xs:attribute type="xs:string" name="release" use="required"/>
     </xs:complexType>
   </xs:element>
 
@@ -54,16 +46,7 @@
 
   <xs:element name="show">
     <xs:complexType>
-      <xs:simpleContent>
-        <xs:extension base="xs:string">
-          <xs:attribute type="xs:dateTime" name="time" use="required"/>
-          <xs:attribute type="xs:string" name="url" use="required"/>
-          <xs:attribute type="xs:string" name="audioType" use="required"/>
-          <xs:attribute type="xs:string" name="subtitled" use="optional"/>
-          <xs:attribute type="xs:string" name="videoType" use="optional"/>
-          <xs:attribute type="xs:string" name="sessionType" use="optional"/>
-        </xs:extension>
-      </xs:simpleContent>
+      <xs:attribute type="xs:dateTime" name="time" use="required"/>
     </xs:complexType>
   </xs:element>
 
