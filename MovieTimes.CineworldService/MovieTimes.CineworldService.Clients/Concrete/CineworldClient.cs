@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MovieTimes.CineworldService.Clients.Concrete
 {
-	public class CineworldClient : Client, ICineworldClient
+	public sealed class CineworldClient : Client, ICineworldClient
 	{
 		private readonly Uri _listingsUri;
 

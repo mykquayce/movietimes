@@ -53,7 +53,7 @@ namespace MovieTimes.CineworldService.Services.Concrete
 						ex.Data.Add(nameof(xml), xml.Truncate());
 
 						scope.Span.Log(
-							nameof(ex), ex,
+							nameof(ex), ex.ToJsonString(),
 							nameof(xml), xml.Truncate());
 
 						_logger.LogCritical(ex, $"{nameof(xml)}={xml.Truncate()}");

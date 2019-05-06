@@ -13,13 +13,13 @@ using System.Threading.Tasks;
 
 namespace MovieTimes.CineworldService.Clients.Concrete
 {
-	public class Client : IClient
+	public abstract class Client : IClient
 	{
 		private readonly ILogger _logger;
 		private readonly ITracer _tracer;
 		private readonly HttpClient _httpClient;
 
-		public Client(
+		protected Client(
 			ILogger<Client> logger,
 			ITracer tracer,
 			IHttpClientFactory httpClientFactory)
