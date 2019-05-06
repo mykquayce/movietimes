@@ -7,6 +7,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,7 +37,12 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 				.Require(u => !string.IsNullOrWhiteSpace(u.OriginalString), _ => nameof(httpClientFactory) + " has a blank base address");
 		}
 
-		public async Task<(HttpStatusCode, string, HttpContentHeaders)> SendAsync(HttpMethod httpMethod, Uri relativeUri, string body = null)
+		public async Task<(HttpStatusCode, string, HttpContentHeaders)> SendAsync(
+			HttpMethod httpMethod,
+			Uri relativeUri,
+			string body = null,
+			[CallerFilePath] string filePath = default,
+			[CallerMemberName] string methodName = default)
 		{
 			Guard.Argument(() => httpMethod).NotNull()
 				.Require(m => !string.IsNullOrWhiteSpace(m.Method), _ => nameof(httpMethod) + " is blank");
@@ -46,7 +52,7 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 				.Require(u => !u.IsAbsoluteUri, _ => nameof(relativeUri) + " must be a relative URI")
 				.Require(u => !string.IsNullOrWhiteSpace(u.OriginalString), _ => nameof(relativeUri) + " is blank");
 
-			using (var scope = _tracer.BuildSpan($"{this.GetType().Name}.{nameof(SendAsync)}")
+			using (var scope = _tracer.BuildDefaultSpan(filePath: filePath, methodName: methodName)
 				.WithTag(nameof(httpMethod), httpMethod.Method)
 				.WithTag(nameof(relativeUri), relativeUri.OriginalString)
 				.WithTag(nameof(body), body)
