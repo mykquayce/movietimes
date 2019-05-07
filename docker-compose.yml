@@ -32,6 +32,19 @@ services:
     secrets:
     - source: MySqlCineworldUser
     - source: MySqlCineworldPassword
+ 
+  api:
+    image: eassbhhtgu/movietimes-api:latest
+    environment:
+    - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+    - 45321:80/tcp
+    depends_on:
+    - jaeger
+    - mariadb
+    secrets:
+    - source: MySqlCineworldUser
+    - source: MySqlCineworldPassword
 
 secrets:
   MySqlCineworldUser:
