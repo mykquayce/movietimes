@@ -9,7 +9,7 @@
     <PackageReference Include="Dawn.Guard" Version="1.8.0" />
     <PackageReference Include="Helpers.DockerSecrets" Version="1.0.1" />
     <PackageReference Include="Helpers.Jaeger" Version="1.0.0" />
-    <PackageReference Include="Helpers.Tracing" Version="1.0.3" />
+    <PackageReference Include="Helpers.Tracing" Version="1.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
@@ -19,6 +19,12 @@
     <ProjectReference Include="..\MovieTimes.Api.Configuration\MovieTimes.Api.Configuration.csproj" />
     <ProjectReference Include="..\MovieTimes.Api.Models\MovieTimes.Api.Models.csproj" />
     <ProjectReference Include="..\MovieTimes.Api.Repositories\MovieTimes.Api.Repositories.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.Production.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
