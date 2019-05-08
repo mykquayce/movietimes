@@ -26,7 +26,10 @@ namespace MovieTimes.Api.WebApplication
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services
-				.AddMvc()
+				.AddMvc(mvcOptions=>
+				{
+					mvcOptions.OutputFormatters.Add(new PlainTextOutputFormatter());
+				})
 				.SetCompatibilityVersion(CompatibilityVersion.Latest);
 
 			services
