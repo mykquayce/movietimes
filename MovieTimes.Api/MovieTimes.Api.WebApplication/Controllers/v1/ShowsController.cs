@@ -33,7 +33,7 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 		[Route("")]
 		public async Task<IActionResult> Get(
 			[FromQuery(Name = "cinema")] ICollection<string> cinemas,
-			[FromQuery(Name = "day")] ICollection<Models.DaysOfWeek> daysOfWeeks,
+			[FromQuery(Name = "dayofweek")] ICollection<Models.DaysOfWeek> daysOfWeeks,
 			[FromQuery(Name = "timeofday")] ICollection<Models.TimesOfDay> timesOfDays,
 			[FromQuery(Name = "title")] ICollection<string> searchTerms)
 		{
@@ -50,7 +50,6 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 				.WithTag(nameof(searchTerms), searchTermsString)
 				.StartActive(finishSpanOnDispose: true))
 			{
-
 				_logger?.LogInformation($"{nameof(cinemas)}={cinemasString};{nameof(daysOfWeek)}={daysOfWeek:F};{nameof(timesOfDay)}={timesOfDay:F};{nameof(searchTerms)}={searchTermsString}");
 
 				ICollection<short> cinemaIds;
