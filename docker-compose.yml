@@ -5,12 +5,12 @@ services:
   jaeger:
     image: jaegertracing/all-in-one:latest
     ports:
-    - 16686:16686/tcp
+    - 45323:16686/tcp
 
   mariadb:
     image: mariadb:latest
     ports:
-    - 3306:3306/tcp
+    - 45322:3306/tcp
     environment:
     - MYSQL_RANDOM_ROOT_PASSWORD=yes
     - MYSQL_DATABASE=cineworld

@@ -89,7 +89,17 @@ namespace MovieTimes.CineworldService.ConsoleApp
 					services
 						.AddTransient<Clients.ICineworldClient, Clients.Concrete.CineworldClient>()
 						.AddTransient<Services.ICineworldService, Services.Concrete.CineworldService>()
-						.AddTransient<Repositories.ICineworldRepository, Repositories.Concrete.CineworldRepository>();
+						.AddTransient<Repositories.ICineworldRepository>(serviceProvider=>
+						{
+							var dbSettings = hostBuilderContext.Configuration
+								.GetSection(nameof(Configuration.DbSettings))
+								.Get<Configuration.DbSettings>();
+
+							var logger = serviceProvider.GetRequiredService<ILogger<Repositories.Concrete.CineworldRepository>>();
+							var tracer = serviceProvider.GetRequiredService<ITracer>();
+
+							return new Repositories.Concrete.CineworldRepository(dbSettings.ConnectionString, logger, tracer);
+						});
 
 					services
 						.AddHostedService<HostedService>();
