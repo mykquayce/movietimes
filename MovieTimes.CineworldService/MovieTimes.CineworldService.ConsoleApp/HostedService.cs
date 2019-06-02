@@ -55,41 +55,42 @@ namespace MovieTimes.CineworldService.ConsoleApp
 			OnTimedEventAsync(this, default);
 		}
 
-		private async void OnTimedEventAsync(object sender, ElapsedEventArgs e)
+		private async void OnTimedEventAsync(object sender, ElapsedEventArgs? e)
 		{
-			using (var scope = _tracer
+			using var scope = _tracer
 				.BuildDefaultSpan()
 				.WithTag(nameof(_lastModified), _lastModified.ToString("O"))
-				.StartActive())
+				.StartActive();
+
+			// Get last modified
+			var lastModified = await _cineworldClient.GetListingsLastModifiedAsync();
+
+			scope.Span.Log(new Dictionary<string, object> { { nameof(lastModified), lastModified }, });
+
+			_logger.LogInformation("{0}={1:O}, {2}={3:O}, {4}", nameof(_lastModified), _lastModified, nameof(lastModified), lastModified, lastModified <= _lastModified);
+
+			// Newer than last time?
+			if (lastModified <= _lastModified)
 			{
-				// Get last modified
-				var lastModified = await _cineworldClient.GetListingsLastModifiedAsync();
-
-				scope.Span.Log(new Dictionary<string, object> { { nameof(lastModified), lastModified }, });
-
-				_logger.LogInformation("{0}={1:O}, {2}={3:O}, {4}", nameof(_lastModified), _lastModified, nameof(lastModified), lastModified, lastModified <= _lastModified);
-
-				// Newer than last time?
-				if (lastModified <= _lastModified)
-				{
-					return;
-				}
-
-				// Get listings
-				var cinemas = await _cineworldService.GetCinemasAsync();
-
-				var (cinemaCount, filmCount, showCount) = cinemas.GetCounts();
-
-				_logger.LogInformation("Downloaded {0:D} {1}(s), {2:D} {3}(s), and {4:D} {5}(s)", cinemaCount, nameof(cinema), filmCount, nameof(film), showCount, nameof(show));
-
-				// Save listings
-				_cineworldRepository.SaveCinemasAsync(cinemas);
-
-				_logger.LogInformation("Saved");
-
-				// Store last modified
-				_lastModified = lastModified;
+				return;
 			}
+
+			// Get listings
+			var cinemas = await _cineworldService.GetCinemasAsync();
+
+			var (cinemaCount, filmCount, showCount) = cinemas.GetCounts();
+
+			_logger.LogInformation("Downloaded {0:D} {1}(s), {2:D} {3}(s), and {4:D} {5}(s)", cinemaCount, nameof(cinema), filmCount, nameof(film), showCount, nameof(show));
+
+			// Save listings
+#pragma warning disable CS4014
+			_cineworldRepository.SaveCinemasAsync(cinemas);
+#pragma warning restore CS4014
+
+			_logger.LogInformation("Saved");
+
+			// Store last modified
+			_lastModified = lastModified;
 		}
 
 		public Task StartAsync(CancellationToken cancellationToken)

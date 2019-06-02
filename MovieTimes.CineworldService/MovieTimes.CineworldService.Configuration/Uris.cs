@@ -2,7 +2,7 @@
 {
 	public class Uris
 	{
-		public string CineworldBaseUri { get; set; }
-		public string ListingsUri { get; set; }
+		public string? CineworldBaseUri { get; set; }
+		public string? ListingsUri { get; set; }
 	}
 }

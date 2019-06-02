@@ -40,9 +40,9 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 		public async Task<(HttpStatusCode, string, HttpContentHeaders)> SendAsync(
 			HttpMethod httpMethod,
 			Uri relativeUri,
-			string body = null,
-			[CallerFilePath] string filePath = default,
-			[CallerMemberName] string methodName = default)
+			string? body = default,
+			[CallerFilePath] string? filePath = default,
+			[CallerMemberName] string? methodName = default)
 		{
 			Guard.Argument(() => httpMethod).NotNull()
 				.Require(m => !string.IsNullOrWhiteSpace(m.Method), _ => nameof(httpMethod) + " is blank");
@@ -52,50 +52,49 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 				.Require(u => !u.IsAbsoluteUri, _ => nameof(relativeUri) + " must be a relative URI")
 				.Require(u => !string.IsNullOrWhiteSpace(u.OriginalString), _ => nameof(relativeUri) + " is blank");
 
-			using (var scope = _tracer.BuildDefaultSpan(filePath: filePath, methodName: methodName)
+			using var scope = _tracer.BuildDefaultSpan(filePath: filePath, methodName: methodName)
 				.WithTag(nameof(httpMethod), httpMethod.Method)
 				.WithTag(nameof(relativeUri), relativeUri.OriginalString)
 				.WithTag(nameof(body), body)
-				.StartActive(finishSpanOnDispose: true))
+				.StartActive(finishSpanOnDispose: true);
+
+			_logger.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(httpMethod), httpMethod.Method, nameof(relativeUri), relativeUri.OriginalString, nameof(body), body?.Truncate());
+
+			var httpRequestMessage = new HttpRequestMessage(httpMethod, relativeUri);
+
+			if (!string.IsNullOrWhiteSpace(body))
 			{
-				_logger.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(httpMethod), httpMethod.Method, nameof(relativeUri), relativeUri.OriginalString, nameof(body), body.Truncate());
+				var requestContent = new StringContent(body, Encoding.UTF8, "application/json");
 
-				var httpRequestMessage = new HttpRequestMessage(httpMethod, relativeUri);
-
-				if (!string.IsNullOrWhiteSpace(body))
-				{
-					var requestContent = new StringContent(body, Encoding.UTF8, "application/json");
-
-					httpRequestMessage.Content = requestContent;
-				}
-
-				HttpResponseMessage httpResponseMessage;
-
-				try
-				{
-					httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage);
-				}
-				catch (Exception ex)
-				{
-					scope.Span.Log(nameof(ex), ex.ToJsonString());
-
-					_logger.LogCritical(ex, "{0}={1}, {2}={3}, {4}={5}", nameof(httpMethod), httpMethod.Method, nameof(relativeUri), relativeUri.OriginalString, nameof(body), body);
-					return default;
-				}
-
-				var responseStatusCode = httpResponseMessage.StatusCode;
-				var responseContent = await httpResponseMessage.Content?.ReadAsStringAsync();
-				var responseHeaders = httpResponseMessage.Content?.Headers;
-
-				scope.Span.Log(
-					nameof(responseStatusCode), responseStatusCode,
-					nameof(responseContent), responseContent,
-					nameof(responseHeaders), responseHeaders?.ToJsonString());
-
-				_logger.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(responseStatusCode), responseStatusCode, nameof(responseContent), responseContent.Truncate(), nameof(responseHeaders), responseHeaders?.ToJsonString());
-
-				return (responseStatusCode, responseContent, responseHeaders);
+				httpRequestMessage.Content = requestContent;
 			}
+
+			HttpResponseMessage httpResponseMessage;
+
+			try
+			{
+				httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage);
+			}
+			catch (Exception ex)
+			{
+				scope.Span.Log(nameof(ex), ex.ToJsonString());
+
+				_logger.LogCritical(ex, "{0}={1}, {2}={3}, {4}={5}", nameof(httpMethod), httpMethod.Method, nameof(relativeUri), relativeUri.OriginalString, nameof(body), body);
+				return default;
+			}
+
+			var responseStatusCode = httpResponseMessage.StatusCode;
+			var responseContent = await httpResponseMessage.Content.ReadAsStringAsync();
+			var responseHeaders = httpResponseMessage.Content.Headers;
+
+			scope.Span.Log(
+				nameof(responseStatusCode), responseStatusCode,
+				nameof(responseContent), responseContent,
+				nameof(responseHeaders), responseHeaders.ToJsonString());
+
+			_logger.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(responseStatusCode), responseStatusCode, nameof(responseContent), responseContent.Truncate(), nameof(responseHeaders), responseHeaders.ToJsonString());
+
+			return (responseStatusCode, responseContent, responseHeaders);
 		}
 	}
 }

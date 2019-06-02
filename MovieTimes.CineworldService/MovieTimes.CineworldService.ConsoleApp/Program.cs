@@ -28,7 +28,7 @@ namespace MovieTimes.CineworldService.ConsoleApp
 						hostBuilderContext.HostingEnvironment.ApplicationName = System.Reflection.Assembly.GetAssembly(typeof(Program)).GetName().Name;
 					}
 
-					var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? EnvironmentName.Production;
+					var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Production;
 
 					hostBuilderContext.HostingEnvironment.EnvironmentName = environmentName;
 
@@ -60,18 +60,17 @@ namespace MovieTimes.CineworldService.ConsoleApp
 					services
 						.AddJaegerTracing(hostBuilderContext.HostingEnvironment.ApplicationName, jaegerSettings.Host, jaegerSettings.Port);
 
-					var uris = hostBuilderContext
-						.Configuration.GetSection(nameof(Configuration.Uris))
-						.Get<Configuration.Uris>();
-
 					services
 						.AddHttpClient(
 							nameof(Clients.Concrete.CineworldClient),
 							(_, client) =>
 							{
+								var uriSettings = hostBuilderContext.Configuration
+									.GetSection(nameof(Configuration.Uris))
+									.Get<Configuration.Uris>();
+
 								client.Timeout = TimeSpan.FromSeconds(10);
-								//var settingsOptions = serviceProvider.GetRequiredService<IOptions<Configuration.Uris>>();
-								client.BaseAddress = new Uri(uris.CineworldBaseUri, UriKind.Absolute);
+								client.BaseAddress = new Uri(uriSettings.CineworldBaseUri, UriKind.Absolute);
 								client.DefaultRequestHeaders.Accept.Clear();
 								client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
 							})
@@ -89,7 +88,7 @@ namespace MovieTimes.CineworldService.ConsoleApp
 					services
 						.AddTransient<Clients.ICineworldClient, Clients.Concrete.CineworldClient>()
 						.AddTransient<Services.ICineworldService, Services.Concrete.CineworldService>()
-						.AddTransient<Repositories.ICineworldRepository>(serviceProvider=>
+						.AddTransient<Repositories.ICineworldRepository>(serviceProvider =>
 						{
 							var dbSettings = hostBuilderContext.Configuration
 								.GetSection(nameof(Configuration.DbSettings))

@@ -12,8 +12,8 @@ namespace MovieTimes.CineworldService.Clients
 		Task<(HttpStatusCode, string, HttpContentHeaders)> SendAsync(
 			HttpMethod httpMethod,
 			Uri relativeUri,
-			string body = default,
-			[CallerFilePath] string filePath = default,
-			[CallerMemberName] string methodName = default);
+			string? body = default,
+			[CallerFilePath] string? filePath = default,
+			[CallerMemberName] string? methodName = default);
 	}
 }
