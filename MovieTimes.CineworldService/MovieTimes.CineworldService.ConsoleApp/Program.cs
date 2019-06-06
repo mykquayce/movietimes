@@ -90,14 +90,27 @@ namespace MovieTimes.CineworldService.ConsoleApp
 						.AddTransient<Services.ICineworldService, Services.Concrete.CineworldService>()
 						.AddTransient<Repositories.ICineworldRepository>(serviceProvider =>
 						{
+							var dockerSecrets = hostBuilderContext.Configuration
+								.GetSection(nameof(Configuration.DockerSecrets))
+								.Get<Configuration.DockerSecrets>();
+
 							var dbSettings = hostBuilderContext.Configuration
 								.GetSection(nameof(Configuration.DbSettings))
 								.Get<Configuration.DbSettings>();
 
+							var builder = new MySql.Data.MySqlClient.MySqlConnectionStringBuilder
+							{
+								Server = dbSettings.Server,
+								Port = (uint)dbSettings.Port,
+								UserID = dockerSecrets.MySqlCineworldUser ?? dbSettings.UserId,
+								Password = dockerSecrets.MySqlCineworldPassword ?? dbSettings.Password,
+								Database = dbSettings.Database,
+							};
+
 							var logger = serviceProvider.GetRequiredService<ILogger<Repositories.Concrete.CineworldRepository>>();
 							var tracer = serviceProvider.GetRequiredService<ITracer>();
 
-							return new Repositories.Concrete.CineworldRepository(dbSettings.ConnectionString, logger, tracer);
+							return new Repositories.Concrete.CineworldRepository(builder.ConnectionString, logger, tracer);
 						});
 
 					services
