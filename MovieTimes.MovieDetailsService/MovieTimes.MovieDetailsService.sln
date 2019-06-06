@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28902.138
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.MovieDetailsService.ConsoleApp", "MovieTimes.MovieDetailsService.ConsoleApp\MovieTimes.MovieDetailsService.ConsoleApp.csproj", "{81DC2D41-9841-4670-AC4A-8D071E0B75DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.MovieDetailsService.ConsoleApp", "MovieTimes.MovieDetailsService.ConsoleApp\MovieTimes.MovieDetailsService.ConsoleApp.csproj", "{81DC2D41-9841-4670-AC4A-8D071E0B75DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.MovieDetailsService.Clients", "MovieTimes.MovieDetailsService.Clients\MovieTimes.MovieDetailsService.Clients.csproj", "{09484FC1-5F48-4B95-9CD3-50A0F8D91C7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.MovieDetailsService.Clients", "MovieTimes.MovieDetailsService.Clients\MovieTimes.MovieDetailsService.Clients.csproj", "{09484FC1-5F48-4B95-9CD3-50A0F8D91C7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.MovieDetailsService.Models", "MovieTimes.MovieDetailsService.Models\MovieTimes.MovieDetailsService.Models.csproj", "{0AB7B13F-2A1A-426C-AE24-23B29DE7CE8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.MovieDetailsService.Models", "MovieTimes.MovieDetailsService.Models\MovieTimes.MovieDetailsService.Models.csproj", "{0AB7B13F-2A1A-426C-AE24-23B29DE7CE8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.MovieDetailsService.Clients.Tests", "MovieTimes.MovieDetailsService.Clients.Tests\MovieTimes.MovieDetailsService.Clients.Tests.csproj", "{770C8328-8163-419E-B757-ED63919EF5DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.MovieDetailsService.Clients.Tests", "MovieTimes.MovieDetailsService.Clients.Tests\MovieTimes.MovieDetailsService.Clients.Tests.csproj", "{770C8328-8163-419E-B757-ED63919EF5DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.MovieDetailsService.Configuration", "MovieTimes.MovieDetailsService.Configuration\MovieTimes.MovieDetailsService.Configuration.csproj", "{3C4F6301-7EA8-454D-8C6E-3DBA5F0E8D99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.MovieDetailsService.Configuration", "MovieTimes.MovieDetailsService.Configuration\MovieTimes.MovieDetailsService.Configuration.csproj", "{3C4F6301-7EA8-454D-8C6E-3DBA5F0E8D99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.MovieDetailsService.Repositories", "MovieTimes.MovieDetailsService.Repositories\MovieTimes.MovieDetailsService.Repositories.csproj", "{81A8F9D5-EB3B-42FB-A3BE-FDB85B0B301A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{3C4F6301-7EA8-454D-8C6E-3DBA5F0E8D99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C4F6301-7EA8-454D-8C6E-3DBA5F0E8D99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C4F6301-7EA8-454D-8C6E-3DBA5F0E8D99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81A8F9D5-EB3B-42FB-A3BE-FDB85B0B301A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81A8F9D5-EB3B-42FB-A3BE-FDB85B0B301A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81A8F9D5-EB3B-42FB-A3BE-FDB85B0B301A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81A8F9D5-EB3B-42FB-A3BE-FDB85B0B301A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

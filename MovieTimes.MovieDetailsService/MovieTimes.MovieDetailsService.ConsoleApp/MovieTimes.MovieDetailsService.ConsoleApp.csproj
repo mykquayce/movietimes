@@ -6,7 +6,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Helpers.DockerSecrets" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.0.0-preview5.19227.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0-preview5.19227.9" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0-preview5.19227.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.0.0-preview5.19227.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MovieTimes.MovieDetailsService.Configuration\MovieTimes.MovieDetailsService.Configuration.csproj" />
+    <ProjectReference Include="..\MovieTimes.MovieDetailsService.Repositories\MovieTimes.MovieDetailsService.Repositories.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
