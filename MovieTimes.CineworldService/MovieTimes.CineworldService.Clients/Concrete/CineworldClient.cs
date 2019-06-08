@@ -13,8 +13,8 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 		private readonly Uri _listingsUri;
 
 		public CineworldClient(
-			ILogger<CineworldClient> logger,
-			ITracer tracer,
+			ILogger<CineworldClient>? logger,
+			ITracer? tracer,
 			IHttpClientFactory httpClientFactory,
 			IOptions<Configuration.Uris> urisOptions)
 			: base(logger, tracer, httpClientFactory)

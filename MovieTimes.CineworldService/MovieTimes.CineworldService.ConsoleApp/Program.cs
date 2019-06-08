@@ -102,8 +102,8 @@ namespace MovieTimes.CineworldService.ConsoleApp
 							{
 								Server = dbSettings.Server,
 								Port = (uint)dbSettings.Port,
-								UserID = dockerSecrets.MySqlCineworldUser ?? dbSettings.UserId,
-								Password = dockerSecrets.MySqlCineworldPassword ?? dbSettings.Password,
+								UserID = dockerSecrets?.MySqlCineworldUser ?? dbSettings.UserId,
+								Password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password,
 								Database = dbSettings.Database,
 							};
 

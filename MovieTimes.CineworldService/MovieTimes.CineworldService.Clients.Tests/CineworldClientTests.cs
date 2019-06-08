@@ -18,10 +18,6 @@ namespace MovieTimes.CineworldService.Clients.Tests
 		{
 			var httpClient = new HttpClient { BaseAddress = new Uri("https://www.cineworld.co.uk/", UriKind.Absolute), };
 
-			var logger = Mock.Of<ILogger<CineworldClient>>();
-
-			var tracer = Mock.Of<ITracer>();
-
 			var httpClientFactoryMock = new Mock<IHttpClientFactory>();
 
 			httpClientFactoryMock
@@ -32,7 +28,7 @@ namespace MovieTimes.CineworldService.Clients.Tests
 
 			var urisOptions = Mock.Of<IOptions<Configuration.Uris>>(o => o.Value == uris);
 
-			_cineworldClient = new CineworldClient(logger, tracer, httpClientFactoryMock.Object, urisOptions);
+			_cineworldClient = new CineworldClient(logger: default, tracer: default, httpClientFactoryMock.Object, urisOptions);
 		}
 
 		[Theory]

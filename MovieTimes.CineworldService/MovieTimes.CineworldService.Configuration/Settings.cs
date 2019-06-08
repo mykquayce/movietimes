@@ -2,6 +2,6 @@
 {
 	public class Settings
 	{
-		public int IntervalMS { get; set; }
+		public int IntervalMS { get; set; } = 3_600_000;
 	}
 }
