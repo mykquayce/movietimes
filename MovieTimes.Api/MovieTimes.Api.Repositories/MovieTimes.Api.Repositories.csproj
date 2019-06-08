@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.60.6" />
     <PackageReference Include="Dawn.Guard" Version="1.8.0" />
-    <PackageReference Include="Helpers.DockerSecrets" Version="1.0.1" />
-    <PackageReference Include="Helpers.Tracing" Version="1.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
-    <PackageReference Include="MySql.Data" Version="8.0.16" />
+    <PackageReference Include="Helpers.MySql" Version="1.0.5-alpha" />
+    <PackageReference Include="Helpers.Tracing" Version="1.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0-preview5.19227.9" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.0.0-preview5.19227.9" />
   </ItemGroup>
 
   <ItemGroup>

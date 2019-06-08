@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.Api.WebApplication", "MovieTimes.Api.WebApplication\MovieTimes.Api.WebApplication.csproj", "{2D255710-195A-42F0-BD3D-7A6F42655A23}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.Api.Repositories", "MovieTimes.Api.Repositories\MovieTimes.Api.Repositories.csproj", "{9B00DD71-474E-47B3-AEF4-34225ACE3038}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.Api.Repositories.Tests", "MovieTimes.Api.Repositories.Tests\MovieTimes.Api.Repositories.Tests.csproj", "{607D016F-4B1E-4DB5-973C-A04F8E027931}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.Api.Configuration", "MovieTimes.Api.Configuration\MovieTimes.Api.Configuration.csproj", "{B76043E8-C36F-44D8-9050-3091D09FF44B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.Api.Models", "MovieTimes.Api.Models\MovieTimes.Api.Models.csproj", "{81A2ED18-63FC-4D75-90C9-336951E02558}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.Api.Models", "MovieTimes.Api.Models\MovieTimes.Api.Models.csproj", "{81A2ED18-63FC-4D75-90C9-336951E02558}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C3E654AF-1474-4F42-97B8-BB4E6BA1C163}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,16 +17,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.Api.WebApplication", "MovieTimes.Api.WebApplication\MovieTimes.Api.WebApplication.csproj", "{6D2113DF-1EE1-4487-A0E1-AE9EECAA545B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2D255710-195A-42F0-BD3D-7A6F42655A23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2D255710-195A-42F0-BD3D-7A6F42655A23}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2D255710-195A-42F0-BD3D-7A6F42655A23}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2D255710-195A-42F0-BD3D-7A6F42655A23}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9B00DD71-474E-47B3-AEF4-34225ACE3038}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9B00DD71-474E-47B3-AEF4-34225ACE3038}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B00DD71-474E-47B3-AEF4-34225ACE3038}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +41,10 @@ Global
 		{81A2ED18-63FC-4D75-90C9-336951E02558}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81A2ED18-63FC-4D75-90C9-336951E02558}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81A2ED18-63FC-4D75-90C9-336951E02558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D2113DF-1EE1-4487-A0E1-AE9EECAA545B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D2113DF-1EE1-4487-A0E1-AE9EECAA545B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D2113DF-1EE1-4487-A0E1-AE9EECAA545B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D2113DF-1EE1-4487-A0E1-AE9EECAA545B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

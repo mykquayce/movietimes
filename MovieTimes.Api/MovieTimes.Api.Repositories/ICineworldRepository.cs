@@ -9,7 +9,7 @@ namespace MovieTimes.Api.Repositories
 	{
 		Task<IEnumerable<(short id, string name)>> GetCinemasAsync(ICollection<string> names);
 
-		Task<IEnumerable<(short id, string name)>> GetCinemasAsync(string search = default);
+		Task<IEnumerable<(short id, string name)>> GetCinemasAsync(string? search = default);
 
 		Task<IEnumerable<(short cinemaId, string cinemaName, DateTime dateTime, string title)>> GetShowsAsync(
 			ICollection<short> cinemaIds,

@@ -31,41 +31,42 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 		[HttpGet]
 		[Route("")]
 		public async Task<IActionResult> Get(
-			[FromQuery(Name = "name")] IReadOnlyCollection<string> names = default)
+			[FromQuery(Name = "name")] IReadOnlyCollection<string>? names = default)
 		{
 			var namesString = string.Join(", ", names);
 
-			using (var scope = _tracer.BuildDefaultSpan()
+			using var scope = _tracer.BuildDefaultSpan()
 				.WithTag(nameof(names), namesString)
-				.StartActive(finishSpanOnDispose: true))
+				.StartActive(finishSpanOnDispose: true);
+
+			_logger.LogInformation($"{nameof(names)}={namesString}");
+
+			if (names == default
+				|| names.All(string.IsNullOrWhiteSpace))
 			{
-				_logger.LogInformation($"{nameof(names)}={namesString}");
-
-				if (names == default
-					|| names.All(string.IsNullOrWhiteSpace))
-				{
-					return Ok(from c in await _cineworldRepository.GetCinemasAsync()
-							  select new
-							  {
-								  c.id,
-								  c.name,
-							  });
-				}
-
-				var tasks = names.Where(s => !string.IsNullOrWhiteSpace(s)).Select(_cineworldRepository.GetCinemasAsync);
-
-				var cinemases = await Task.WhenAll(tasks);
-
-				return Ok(from cc in cinemases
-						  from c in cc
-						  group c by c.id into gg
-						  orderby gg.Key
+				return Ok(from c in await _cineworldRepository.GetCinemasAsync()
 						  select new
 						  {
-							  id = gg.Key,
-							  gg.First().name,
+							  c.id,
+							  c.name,
 						  });
 			}
+
+			var tasks = from name in names
+						where !string.IsNullOrWhiteSpace(name)
+						select _cineworldRepository.GetCinemasAsync();
+
+			var cinemases = await Task.WhenAll(tasks);
+
+			return Ok(from cc in cinemases
+					  from c in cc
+					  group c by c.id into gg
+					  orderby gg.Key
+					  select new
+					  {
+						  id = gg.Key,
+						  gg.First().name,
+					  });
 		}
 	}
 }

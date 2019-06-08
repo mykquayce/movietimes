@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -17,15 +18,15 @@ namespace MovieTimes.Api.WebApplication
 			SupportedEncodings.Add(Encoding.Unicode);
 		}
 
-		public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
+		public async override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
 		{
 			var sb = new StringBuilder();
 
-			PropertyInfo[] properties = default;
+			IEnumerable<PropertyInfo>? properties = default;
 
 			void f(object o)
 			{
-				properties = properties ?? o.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
+				properties ??= o.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty);
 				var values = properties.Select(p => p.GetValue(o));
 				var line = string.Join("\t", values);
 				sb.AppendLine(line);
@@ -43,12 +44,9 @@ namespace MovieTimes.Api.WebApplication
 				f(context.Object);
 			}
 
-			using (var writer = context.WriterFactory(context.HttpContext.Response.Body, selectedEncoding))
-			{
-				writer.WriteLine(sb.ToString());
-			}
+			using var writer = context.WriterFactory(context.HttpContext.Response.Body, selectedEncoding);
 
-			return Task.CompletedTask;
+			await writer.WriteAsync(sb.ToString());
 		}
 	}
 }

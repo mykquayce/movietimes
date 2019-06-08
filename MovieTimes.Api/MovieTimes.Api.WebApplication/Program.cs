@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 
 namespace MovieTimes.Api.WebApplication
@@ -8,8 +8,11 @@ namespace MovieTimes.Api.WebApplication
 	{
 		public static Task Main(string[] args)
 		{
-			return WebHost.CreateDefaultBuilder(args)
-				.UseStartup<Startup>()
+			return Host.CreateDefaultBuilder(args)
+				.ConfigureWebHostDefaults(webBuilder =>
+				{
+					webBuilder.UseStartup<Startup>();
+				})
 				.Build()
 				.RunAsync();
 		}

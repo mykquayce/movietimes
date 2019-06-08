@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace MovieTimes.Api.WebApplication
@@ -12,9 +12,10 @@ namespace MovieTimes.Api.WebApplication
 		private readonly IConfiguration _configuration;
 		private readonly string _applicationName;
 
-		public Startup(IConfiguration configuration, IHostingEnvironment env)
+		public Startup(IConfiguration configuration, IWebHostEnvironment env)
 		{
 			_applicationName = env.ApplicationName;
+
 			var isDevelopment = env.IsDevelopment();
 
 			_configuration = configuration
@@ -26,11 +27,11 @@ namespace MovieTimes.Api.WebApplication
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services
-				.AddMvc(mvcOptions=>
+				.AddControllers(mvcOptions=>
 				{
-					mvcOptions.OutputFormatters.Add(new PlainTextOutputFormatter());
+					//mvcOptions.OutputFormatters.Add(new PlainTextOutputFormatter());
 				})
-				.SetCompatibilityVersion(CompatibilityVersion.Latest);
+				.AddNewtonsoftJson();
 
 			services
 				.Configure<Configuration.DbSettings>(_configuration.GetSection(nameof(Configuration.DbSettings)))
@@ -57,14 +58,21 @@ namespace MovieTimes.Api.WebApplication
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
 			}
 
-			app.UseMvc();
+			app.UseRouting();
+
+			app.UseAuthorization();
+
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapControllers();
+			});
 		}
 	}
 }

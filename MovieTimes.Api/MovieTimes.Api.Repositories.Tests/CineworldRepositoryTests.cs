@@ -1,6 +1,3 @@
-using Microsoft.Extensions.Options;
-using Moq;
-using MovieTimes.Api.Configuration;
 using MovieTimes.Api.Models;
 using MovieTimes.Api.Repositories.Concrete;
 using System;
@@ -17,18 +14,9 @@ namespace MovieTimes.Api.Repositories.Tests
 
 		public CineworldRepositoryTests()
 		{
-			var dbSettings = new DbSettings
-			{
-				Server = "localhost",
-				Port = 4040,
-				UserId = "root",
-				Password = "xiebeiyoothohYaidieroh8ahchohphi",
-				Database = "cineworld",
-			};
+			var connectionString = $"server=localhost;port=3306;user id=root;password=xiebeiyoothohYaidieroh8ahchohphi;database=cineworld;";
 
-			var dbSettingsOptions = Mock.Of<IOptions<DbSettings>>(o => o.Value == dbSettings);
-
-			_repository = new CineworldRepository(tracer: default, logger: default, dbSettingsOptions, dockerSecretsOptions: default);
+			_repository = new CineworldRepository(tracer: default, logger: default, connectionString);
 		}
 
 		[Theory]

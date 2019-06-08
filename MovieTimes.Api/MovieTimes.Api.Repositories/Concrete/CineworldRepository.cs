@@ -1,95 +1,66 @@
-﻿using Dapper;
-using Dawn;
+﻿using Dawn;
 using Helpers.Tracing;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MovieTimes.Api.Models;
-using MySql.Data.MySqlClient;
 using OpenTracing;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MovieTimes.Api.Repositories.Concrete
 {
-	public class CineworldRepository : ICineworldRepository, IDisposable
+	public class CineworldRepository : Helpers.MySql.RepositoryBase, ICineworldRepository
 	{
-		private readonly ITracer _tracer;
-		private readonly ILogger _logger;
-		private IDbConnection _connection;
-		private readonly string _connectionString;
+		private readonly ITracer? _tracer;
+		private readonly ILogger? _logger;
 
 		public CineworldRepository(
-			ITracer tracer,
-			ILogger<CineworldRepository> logger,
-			IOptions<Configuration.DbSettings> dbSettingsOptions,
-			IOptions<Configuration.DockerSecrets> dockerSecretsOptions)
+			ITracer? tracer,
+			ILogger<CineworldRepository>? logger,
+			string connectionString)
+			: base(connectionString, logger)
 		{
 			_tracer = tracer;
 			_logger = logger;
-
-			var dbSettings = dbSettingsOptions.Value;
-			var dockerSecrets = dockerSecretsOptions?.Value;
-
-			var server = dbSettings.Server;
-			var port = dbSettings.Port;
-			var userId = dockerSecrets?.MySqlCineworldUser ?? dbSettings.UserId;
-			var password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password;
-			var database = dbSettings.Database;
-
-			_connectionString = $"server={server};port={port:D};user id={userId};password={password};database={database};";
-
-			Connect();
-		}
-
-		public void Dispose()
-		{
-			_connection?.Dispose();
 		}
 
 		public async Task<IEnumerable<(short id, string name)>> GetCinemasAsync(ICollection<string> searchTerms)
 		{
 			var searchTermsString = string.Join(", ", searchTerms);
 
-			using (var scope = _tracer.BuildDefaultSpan()
+			using var _ = _tracer.BuildDefaultSpan()
 				.WithTag(nameof(searchTerms), searchTermsString)
-				.StartActive(finishSpanOnDispose: true))
-			{
-				_logger?.LogInformation($"{nameof(searchTerms)}={searchTermsString}");
+				.StartActive(finishSpanOnDispose: true);
 
-				var tasks = searchTerms.Select(GetCinemasAsync);
+			_logger?.LogInformation($"{nameof(searchTerms)}={searchTermsString}");
 
-				var cinemases = await Task.WhenAll(tasks);
+			var tasks = searchTerms.Select(GetCinemasAsync);
 
-				return from tuples in cinemases
-					   from tuple in tuples
-					   select tuple;
-			}
+			var cinemases = await Task.WhenAll(tasks);
+
+			return from tuples in cinemases
+				   from tuple in tuples
+				   select tuple;
 		}
 
-		public Task<IEnumerable<(short id, string name)>> GetCinemasAsync(string search = default)
+		public async Task<IEnumerable<(short id, string name)>> GetCinemasAsync(string? search = default)
 		{
-			using (var scope = _tracer?.BuildDefaultSpan()
+			using var _ = _tracer?.BuildDefaultSpan()
 				.WithTag(nameof(search), search)
-				.StartActive(finishSpanOnDispose: true))
+				.StartActive(finishSpanOnDispose: true);
+
+			_logger?.LogInformation($"{nameof(search)}={search}");
+
+			if (string.IsNullOrWhiteSpace(search))
 			{
-				_logger?.LogInformation($"{nameof(search)}={search}");
-
-				CheckConnection();
-
-				if (string.IsNullOrWhiteSpace(search))
-				{
-					return _connection.QueryAsync<(short id, string name)>(
-						"SELECT * FROM cineworld.cinema;");
-				}
-
-				return _connection.QueryAsync<(short id, string name)>(
-					"SELECT * FROM cineworld.cinema WHERE name LIKE @search;",
-					new { search = $"%{search}%", });
+				return await base.QueryAsync<(short id, string name)>(
+					"SELECT * FROM cineworld.cinema;");
 			}
+
+			return await base.QueryAsync<(short id, string name)>(
+				"SELECT * FROM cineworld.cinema WHERE name LIKE @search;",
+				new { search = $"%{search}%", });
 		}
 
 		public async Task<IEnumerable<(short cinemaId, string cinemaName, DateTime dateTime, string title)>> GetShowsAsync(
@@ -108,24 +79,22 @@ namespace MovieTimes.Api.Repositories.Concrete
 
 			_logger?.LogInformation($"{nameof(cinemaIds)}={cinemaIdsString},{nameof(daysOfWeek)}={daysOfWeekString},{nameof(timesOfDay)}={timesOfDayString},{nameof(searchTerms)}={searchTermsStrings}");
 
-			using (var scope = _tracer?.BuildDefaultSpan()
+			using var _ = _tracer?.BuildDefaultSpan()
 				.WithTag(nameof(cinemaIds), cinemaIdsString)
 				.WithTag(nameof(daysOfWeek), daysOfWeekString)
 				.WithTag(nameof(timesOfDay), timesOfDayString)
 				.WithTag(nameof(searchTerms), searchTermsStrings)
-				.StartActive(finishSpanOnDispose: true))
-			{
-				CheckConnection();
+				.StartActive(finishSpanOnDispose: true);
 
-				var cinemaIdsSql = cinemaIds.Count == 0
-					? "1 = 1"
-					: "c.id IN @cinemaIds";
+			var cinemaIdsSql = cinemaIds.Count == 0
+				? "1 = 1"
+				: "c.id IN @cinemaIds";
 
-				var dayNameSql = daysOfWeek == DaysOfWeek.None
-					? "1 = 1"
-					: "DAYNAME(s.time) IN @daysOfWeek";
+			var dayNameSql = daysOfWeek == DaysOfWeek.None
+				? "1 = 1"
+				: "DAYNAME(s.time) IN @daysOfWeek";
 
-				var sql = $@"SELECT c.id cinemaId, c.name cinemaName, s.time, f.title
+			var sql = $@"SELECT c.id cinemaId, c.name cinemaName, s.time, f.title
 					FROM cineworld.cinema c
 						JOIN cineworld.show s ON c.id = s.cinemaId
 						JOIN cineworld.film f ON s.filmEdi = f.edi
@@ -135,38 +104,15 @@ namespace MovieTimes.Api.Repositories.Concrete
 						AND {SqlFromSearchTerms(searchTerms)}
 						ORDER BY c.name, s.time, f.title;";
 
-				var @params = new
-				{
-					cinemaIds,
-					daysOfWeek = daysOfWeekString.Split(','),
-				};
-
-				var results = await _connection.QueryAsync<(short cinemaId, string cinemaName, DateTime dateTime, string title)>(sql, @params);
-
-				return results;
-			}
-		}
-
-		public void Connect()
-		{
-			_connection = new MySqlConnection(_connectionString);
-		}
-
-		public void CheckConnection()
-		{
-			if (_connection == default)
+			var @params = new
 			{
-				Connect();
-			}
+				cinemaIds,
+				daysOfWeek = daysOfWeekString.Split(','),
+			};
 
-			try
-			{
-				var now = _connection.ExecuteScalar("SELECT NOW();");
-			}
-			catch (MySqlException)
-			{
-				Connect();
-			}
+			var results = await base.QueryAsync<(short cinemaId, string cinemaName, DateTime dateTime, string title)>(sql, @params);
+
+			return results;
 		}
 
 		private static string SqlFromTimesOfDay(TimesOfDay timesOfDay)

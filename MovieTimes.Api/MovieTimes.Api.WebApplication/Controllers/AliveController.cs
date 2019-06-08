@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
 
@@ -9,10 +9,10 @@ namespace MovieTimes.Api.WebApplication.Controllers
 	[ApiController]
 	public class AliveController : ControllerBase
 	{
-		private readonly IHostingEnvironment _hostingEnvironment;
+		private readonly IWebHostEnvironment _hostingEnvironment;
 
 		public AliveController(
-			IHostingEnvironment hostingEnvironment)
+			IWebHostEnvironment hostingEnvironment)
 		{
 			_hostingEnvironment = hostingEnvironment;
 		}
