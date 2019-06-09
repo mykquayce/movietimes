@@ -40,7 +40,7 @@ namespace MovieTimes.Api.Repositories.Tests
 		}
 
 		[Theory]
-		[InlineData(new[] { (short)23, }, DaysOfWeek.Saturday, TimesOfDay.Morning | TimesOfDay.Afternoon, new[] { "detective", "pikachu", })]
+		[InlineData(new[] { (short)23, }, DaysOfWeek.Monday, TimesOfDay.Morning | TimesOfDay.Afternoon, new[] { "dark", "phoenix", })]
 		public async Task CineworldRepositoryTests_GetShowsAsync(
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,

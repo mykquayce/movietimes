@@ -18,7 +18,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 		public CineworldRepository(
 			ITracer? tracer,
 			ILogger<CineworldRepository>? logger,
-			string connectionString)
+			string? connectionString)
 			: base(connectionString, logger)
 		{
 			_tracer = tracer;
@@ -29,7 +29,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 		{
 			var searchTermsString = string.Join(", ", searchTerms);
 
-			using var _ = _tracer.BuildDefaultSpan()
+			using var _ = _tracer?.BuildDefaultSpan()
 				.WithTag(nameof(searchTerms), searchTermsString)
 				.StartActive(finishSpanOnDispose: true);
 

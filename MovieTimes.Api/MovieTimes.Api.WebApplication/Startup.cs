@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace MovieTimes.Api.WebApplication
 {
@@ -41,10 +42,17 @@ namespace MovieTimes.Api.WebApplication
 			var jaegerSettings = _configuration.GetSection(nameof(Configuration.JaegerSettings)).Get<Configuration.JaegerSettings>();
 
 			services
-				.AddJaegerTracing(_applicationName, jaegerSettings.Host, jaegerSettings.Port);
+				.AddJaegerTracing(_applicationName, jaegerSettings?.Host, jaegerSettings?.Port ?? 6831);
 
 			services
-				.AddTransient<Repositories.ICineworldRepository, Repositories.Concrete.CineworldRepository>();
+				.AddTransient<Repositories.ICineworldRepository>(serviceProvider =>
+				{
+					var tracer = serviceProvider.GetService<OpenTracing.ITracer>();
+					var logger = serviceProvider.GetService<ILogger<Repositories.Concrete.CineworldRepository>>();
+					var dbSettings = _configuration.GetSection(nameof(Configuration.DbSettings)).Get<Configuration.DbSettings>();
+
+					return new Repositories.Concrete.CineworldRepository(tracer, logger, dbSettings?.ConnectionString);
+				});
 
 			services
 				.AddLogging(builder =>
@@ -68,6 +76,11 @@ namespace MovieTimes.Api.WebApplication
 			app.UseRouting();
 
 			app.UseAuthorization();
+
+			app
+				.UseMiddleware<Helpers.Tracing.Middleware.ErrorHandlingMiddleware>()
+				.UseMiddleware<Helpers.Tracing.Middleware.AttachRequestBodyToTraceMiddleware>()
+				.UseMiddleware<Helpers.Tracing.Middleware.AttachResponseBodyToTraceMiddleware>();
 
 			app.UseEndpoints(endpoints =>
 			{

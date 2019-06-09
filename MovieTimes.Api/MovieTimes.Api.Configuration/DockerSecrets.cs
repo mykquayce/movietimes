@@ -2,7 +2,7 @@
 {
 	public class DockerSecrets
 	{
-		public string MySqlCineworldPassword { get; set; }
-		public string MySqlCineworldUser { get; set; }
+		public string? MySqlCineworldPassword { get; set; }
+		public string? MySqlCineworldUser { get; set; }
 	}
 }
