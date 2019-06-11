@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 
 namespace MovieTimes.Api.WebApplication
 {
@@ -30,7 +31,7 @@ namespace MovieTimes.Api.WebApplication
 			services
 				.AddControllers(mvcOptions=>
 				{
-					//mvcOptions.OutputFormatters.Add(new PlainTextOutputFormatter());
+					mvcOptions.OutputFormatters.Add(new PlainTextOutputFormatter());
 				})
 				.AddNewtonsoftJson();
 
@@ -47,11 +48,27 @@ namespace MovieTimes.Api.WebApplication
 			services
 				.AddTransient<Repositories.ICineworldRepository>(serviceProvider =>
 				{
-					var tracer = serviceProvider.GetService<OpenTracing.ITracer>();
-					var logger = serviceProvider.GetService<ILogger<Repositories.Concrete.CineworldRepository>>();
-					var dbSettings = _configuration.GetSection(nameof(Configuration.DbSettings)).Get<Configuration.DbSettings>();
+					var dockerSecrets = _configuration
+						.GetSection(nameof(Configuration.DockerSecrets))
+						.Get<Configuration.DockerSecrets>();
 
-					return new Repositories.Concrete.CineworldRepository(tracer, logger, dbSettings?.ConnectionString);
+					var dbSettings = _configuration
+						.GetSection(nameof(Configuration.DbSettings))
+						.Get<Configuration.DbSettings>();
+
+					var builder = new MySql.Data.MySqlClient.MySqlConnectionStringBuilder
+					{
+						Server = dbSettings.Server,
+						Port = (uint)dbSettings.Port,
+						UserID = dockerSecrets?.MySqlCineworldUser ?? dbSettings.UserId,
+						Password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password,
+						Database = dbSettings.Database,
+					};
+
+					var logger = serviceProvider.GetRequiredService<ILogger<Repositories.Concrete.CineworldRepository>>();
+					var tracer = serviceProvider.GetRequiredService<OpenTracing.ITracer>();
+
+					return new Repositories.Concrete.CineworldRepository(tracer, logger, builder.ConnectionString);
 				});
 
 			services
