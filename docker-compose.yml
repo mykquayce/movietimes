@@ -18,6 +18,7 @@ services:
     - MYSQL_PASSWORD_FILE=/run/secrets/MySqlCineworldPassword
     volumes:
     - mariadb-volume:/var/lib/mysql:rw
+    - ./MovieTimes.Db:/docker-entrypoint-initdb.d
     secrets:
     - source: MySqlCineworldUser
     - source: MySqlCineworldPassword
