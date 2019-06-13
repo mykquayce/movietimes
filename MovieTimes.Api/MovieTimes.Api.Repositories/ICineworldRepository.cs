@@ -1,4 +1,4 @@
-﻿using MovieTimes.Api.Models;
+﻿using MovieTimes.Api.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

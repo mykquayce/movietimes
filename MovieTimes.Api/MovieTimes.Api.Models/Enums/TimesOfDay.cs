@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MovieTimes.Api.Models
+namespace MovieTimes.Api.Models.Enums
 {
 	[Flags]
 	public enum TimesOfDay : byte

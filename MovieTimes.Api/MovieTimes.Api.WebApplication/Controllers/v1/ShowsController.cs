@@ -32,12 +32,12 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 		[Route("")]
 		public async Task<IActionResult> Get(
 			[FromQuery(Name = "cinema")] ICollection<string> cinemas,
-			[FromQuery(Name = "dayofweek")] ICollection<Models.DaysOfWeek> daysOfWeeks,
-			[FromQuery(Name = "timeofday")] ICollection<Models.TimesOfDay> timesOfDays,
+			[FromQuery(Name = "dayofweek")] ICollection<Models.Enums.DaysOfWeek> daysOfWeeks,
+			[FromQuery(Name = "timeofday")] ICollection<Models.Enums.TimesOfDay> timesOfDays,
 			[FromQuery(Name = "title")] ICollection<string> searchTerms)
 		{
-			var daysOfWeek = daysOfWeeks.Aggregate(seed: Models.DaysOfWeek.None, (curr, sum) => sum |= curr);
-			var timesOfDay = timesOfDays.Aggregate(seed: Models.TimesOfDay.None, (curr, sum) => sum |= curr);
+			var daysOfWeek = daysOfWeeks.Aggregate(seed: Models.Enums.DaysOfWeek.None, (curr, sum) => sum |= curr);
+			var timesOfDay = timesOfDays.Aggregate(seed: Models.Enums.TimesOfDay.None, (curr, sum) => sum |= curr);
 
 			var cinemasString = string.Join(",", cinemas);
 			var searchTermsString = string.Join(",", searchTerms);

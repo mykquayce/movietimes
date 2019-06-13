@@ -1,7 +1,7 @@
 ﻿using Dawn;
 using Helpers.Tracing;
 using Microsoft.Extensions.Logging;
-using MovieTimes.Api.Models;
+using MovieTimes.Api.Models.Enums;
 using OpenTracing;
 using System;
 using System.Collections.Generic;

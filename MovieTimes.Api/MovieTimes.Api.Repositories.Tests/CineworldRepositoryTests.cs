@@ -1,4 +1,4 @@
-using MovieTimes.Api.Models;
+using MovieTimes.Api.Models.Enums;
 using MovieTimes.Api.Repositories.Concrete;
 using System;
 using System.Collections.Generic;
