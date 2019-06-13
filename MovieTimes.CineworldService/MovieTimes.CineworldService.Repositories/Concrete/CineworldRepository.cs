@@ -42,14 +42,15 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 				{
 					try
 					{
-						ExecuteAsync("DELETE FROM cineworld.show WHERE cinemaId>=0");
-						ExecuteAsync("DELETE FROM cineworld.film WHERE edi>=0");
-						ExecuteAsync("DELETE FROM cineworld.cinema WHERE id>=0");
+						ExecuteAsync("DELETE FROM cineworld.show WHERE cinemaId>=0", transaction: transaction);
+						ExecuteAsync("DELETE FROM cineworld.film WHERE edi>=0", transaction: transaction);
+						ExecuteAsync("DELETE FROM cineworld.cinema WHERE id>=0", transaction: transaction);
 
 						ExecuteAsync(
 							"INSERT cineworld.cinema(id, name) VALUES (@id, @name)",
 							from c in cinemas.cinema
-							select new { c.id, c.name, });
+							select new { c.id, c.name, },
+							transaction: transaction);
 
 						ExecuteAsync(
 							"INSERT cineworld.film(edi, title) VALUES (@edi, @title)",
@@ -61,7 +62,8 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 							{
 								edi = gg.Key,
 								gg.First().title,
-							});
+							},
+							transaction: transaction);
 
 						ExecuteAsync(
 							"INSERT cineworld.show(cinemaId, filmEdi, time) VALUES (@cinemaId, @filmEdi, @time)",
@@ -75,7 +77,8 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 								cinemaId = gg.Key.id,
 								filmEdi = gg.Key.edi,
 								gg.Key.time,
-							});
+							},
+							transaction: transaction);
 
 						transaction.Commit();
 					}
