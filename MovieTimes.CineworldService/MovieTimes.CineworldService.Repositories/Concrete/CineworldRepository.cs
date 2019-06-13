@@ -26,7 +26,7 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 			_tracer = Guard.Argument(() => tracer).NotNull().Value;
 		}
 
-		public Task SaveCinemasAsync(cinemas cinemas)
+		public async Task SaveCinemasAsync(cinemas cinemas)
 		{
 			var (cinemaCount, filmCount, showCount) = cinemas.GetCounts();
 
@@ -36,36 +36,47 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 				.WithTag(nameof(showCount), showCount)
 				.StartActive(finishSpanOnDispose: true))
 			{
+
+				await ExecuteAsync("SELECT NOW();");
+
 				_logger.LogInformation("Saving {0:D} {1}(s), {2:D} {3}(s), {4:D} {5}(s)", cinemaCount, nameof(cinema), filmCount, nameof(film), showCount, nameof(show));
 
 				using (var transaction = BeginTransaction())
 				{
 					try
 					{
-						ExecuteAsync("DELETE FROM cineworld.show WHERE cinemaId>=0", transaction: transaction);
-						ExecuteAsync("DELETE FROM cineworld.film WHERE edi>=0", transaction: transaction);
-						ExecuteAsync("DELETE FROM cineworld.cinema WHERE id>=0", transaction: transaction);
+						await ExecuteAsync("DELETE FROM cineworld.show WHERE cinemaId>=0", transaction: transaction);
 
-						ExecuteAsync(
-							"INSERT cineworld.cinema(id, name) VALUES (@id, @name)",
-							from c in cinemas.cinema
-							select new { c.id, c.name, },
-							transaction: transaction);
+						await Task.WhenAll(
+							ExecuteAsync("DELETE FROM cineworld.film WHERE edi>=0", transaction: transaction),
+							ExecuteAsync("DELETE FROM cineworld.cinema WHERE id>=0", transaction: transaction)
+							);
 
-						ExecuteAsync(
-							"INSERT cineworld.film(edi, title) VALUES (@edi, @title)",
-							from c in cinemas.cinema
-							from f in c.listing
-							where f.edi > 0 // Theatre Let
-							group f by f.edi into gg
-							select new
-							{
-								edi = gg.Key,
-								gg.First().title,
-							},
-							transaction: transaction);
+						await Task.WhenAll(
+							ExecuteAsync(
+								"INSERT cineworld.cinema(id, name) VALUES (@id, @name)",
+								from c in cinemas.cinema
+								select new
+								{
+									c.id,
+									c.name,
+								},
+								transaction: transaction),
+							ExecuteAsync(
+								"INSERT cineworld.film(edi, title) VALUES (@edi, @title)",
+								from c in cinemas.cinema
+								from f in c.listing
+								where f.edi > 0 // Theatre Let
+								group f by f.edi into gg
+								select new
+								{
+									edi = gg.Key,
+									gg.First().title,
+								},
+								transaction: transaction)
+							);
 
-						ExecuteAsync(
+						await ExecuteAsync(
 							"INSERT cineworld.show(cinemaId, filmEdi, time) VALUES (@cinemaId, @filmEdi, @time)",
 							from c in cinemas.cinema
 							from f in c.listing
@@ -89,8 +100,6 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 						transaction.Rollback();
 					}
 				}
-
-				return Task.CompletedTask;
 			}
 		}
 	}
