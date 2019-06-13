@@ -6,6 +6,8 @@ services:
     image: jaegertracing/all-in-one:latest
     ports:
     - 45323:16686/tcp
+    volumes:
+    - jaeger-volume:/tmp:rw
 
   mariadb:
     image: mariadb:latest
@@ -56,4 +58,5 @@ secrets:
     name: MySqlCineworldPassword
 
 volumes:
+  jaeger-volume: {}
   mariadb-volume: {}
