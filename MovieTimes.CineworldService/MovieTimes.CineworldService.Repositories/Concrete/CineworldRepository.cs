@@ -24,11 +24,6 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 		{
 			_logger = Guard.Argument(() => logger).NotNull().Value;
 			_tracer = Guard.Argument(() => tracer).NotNull().Value;
-
-			// deploy
-			base.SafeCreateTableAsync(nameof(Properties.Resources.cinema), Properties.Resources.cinema).GetAwaiter().GetResult();
-			base.SafeCreateTableAsync(nameof(Properties.Resources.film), Properties.Resources.film).GetAwaiter().GetResult();
-			base.SafeCreateTableAsync(nameof(Properties.Resources.show), Properties.Resources.show).GetAwaiter().GetResult();
 		}
 
 		public Task SaveCinemasAsync(cinemas cinemas)
