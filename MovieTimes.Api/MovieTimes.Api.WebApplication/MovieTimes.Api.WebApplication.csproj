@@ -12,6 +12,7 @@
     <PackageReference Include="Helpers.Jaeger" Version="1.0.2-preview" />
     <PackageReference Include="Helpers.Tracing" Version="1.0.8-preview" />
     <PackageReference Include="Helpers.Tracing.Middleware" Version="1.0.2-preview" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0-preview5-19227-01" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0-preview5.19227.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.0.0-preview5.19227.1">

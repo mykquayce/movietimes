@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System.Buffers;
 
 namespace MovieTimes.Api.WebApplication
 {
@@ -21,8 +23,7 @@ namespace MovieTimes.Api.WebApplication
 			var isDevelopment = env.IsDevelopment();
 
 			_configuration = configuration
-				.AddDockerSecret("MySqlCineworldPassword", optional: isDevelopment, reloadOnChange: true)
-				.AddDockerSecret("MySqlCineworldUser",     optional: isDevelopment, reloadOnChange: true);
+				.AddDockerSecret("MySqlCineworldPassword", optional: isDevelopment, reloadOnChange: true);
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
@@ -31,6 +32,16 @@ namespace MovieTimes.Api.WebApplication
 			services
 				.AddControllers(mvcOptions=>
 				{
+					var serializerSettings = new JsonSerializerSettings
+					{
+						ContractResolver = new CamelCasePropertyNamesContractResolver(),
+						DateFormatHandling = DateFormatHandling.IsoDateFormat,
+						DefaultValueHandling = DefaultValueHandling.Ignore,
+						Formatting = Formatting.None,
+						NullValueHandling = NullValueHandling.Ignore,
+					};
+
+					mvcOptions.OutputFormatters.Add(new NewtonsoftJsonOutputFormatter(serializerSettings, ArrayPool<char>.Shared, mvcOptions));
 					mvcOptions.OutputFormatters.Add(new PlainTextOutputFormatter());
 				})
 				.AddNewtonsoftJson();
@@ -60,7 +71,7 @@ namespace MovieTimes.Api.WebApplication
 					{
 						Server = dbSettings.Server,
 						Port = (uint)dbSettings.Port,
-						UserID = dockerSecrets?.MySqlCineworldUser ?? dbSettings.UserId,
+						UserID = dbSettings.UserId,
 						Password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password,
 						Database = dbSettings.Database,
 					};

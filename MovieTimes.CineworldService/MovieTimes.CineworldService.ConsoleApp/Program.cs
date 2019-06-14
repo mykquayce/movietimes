@@ -36,7 +36,6 @@ namespace MovieTimes.CineworldService.ConsoleApp
 						.SetBasePath(Environment.CurrentDirectory)
 						.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 						.AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
-						.AddDockerSecret("MySqlCineworldUser", optional: hostBuilderContext.HostingEnvironment.IsDevelopment(), reloadOnChange: true)
 						.AddDockerSecret("MySqlCineworldPassword", optional: hostBuilderContext.HostingEnvironment.IsDevelopment(), reloadOnChange: true);
 				});
 
@@ -102,7 +101,7 @@ namespace MovieTimes.CineworldService.ConsoleApp
 							{
 								Server = dbSettings.Server,
 								Port = (uint)dbSettings.Port,
-								UserID = dockerSecrets?.MySqlCineworldUser ?? dbSettings.UserId,
+								UserID = dbSettings.UserId,
 								Password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password,
 								Database = dbSettings.Database,
 							};
