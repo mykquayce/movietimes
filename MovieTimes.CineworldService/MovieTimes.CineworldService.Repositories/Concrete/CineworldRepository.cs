@@ -6,6 +6,8 @@ using MovieTimes.CineworldService.Models.Generated;
 using MovieTimes.CineworldService.Models.Helpers;
 using MySql.Data.MySqlClient;
 using OpenTracing;
+using System;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -26,6 +28,10 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 			_tracer = Guard.Argument(() => tracer).NotNull().Value;
 		}
 
+		public new ConnectionState ConnectionState => base.ConnectionState;
+		public new void Connect() => base.Connect();
+		public Task<DateTime> GetDateTimeAsync() => ExecuteScalarAsync<DateTime>("SELECT NOW();");
+
 		public async Task SaveCinemasAsync(cinemas cinemas)
 		{
 			var (cinemaCount, filmCount, showCount) = cinemas.GetCounts();
@@ -36,7 +42,7 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 				.WithTag(nameof(showCount), showCount)
 				.StartActive(finishSpanOnDispose: true);
 
-			await ExecuteAsync("SELECT NOW();");
+			await GetDateTimeAsync();
 
 			_logger.LogInformation("Saving {0:D} {1}(s), {2:D} {3}(s), {4:D} {5}(s)", cinemaCount, nameof(cinema), filmCount, nameof(film), showCount, nameof(show));
 

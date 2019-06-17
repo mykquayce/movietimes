@@ -19,12 +19,14 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.0.0-preview5.19227.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0-preview5.19227.9" />
     <PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="3.0.0-preview5.19227.9" />
+    <PackageReference Include="WorkflowCore" Version="1.9.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MovieTimes.CineworldService.Clients\MovieTimes.CineworldService.Clients.csproj" />
     <ProjectReference Include="..\MovieTimes.CineworldService.Repositories\MovieTimes.CineworldService.Repositories.csproj" />
     <ProjectReference Include="..\MovieTimes.CineworldService.Services\MovieTimes.CineworldService.Services.csproj" />
+    <ProjectReference Include="..\MovieTimes.CineworldService.Workflows\MovieTimes.CineworldService.Workflows.csproj" />
   </ItemGroup>
 
   <ItemGroup>

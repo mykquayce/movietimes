@@ -113,6 +113,19 @@ namespace MovieTimes.CineworldService.ConsoleApp
 						});
 
 					services
+						.AddTransient<Steps.CopyValueStep>()
+						.AddTransient<Steps.DoNotingStep>()
+						.AddTransient<Steps.EchoStep>()
+						.AddTransient<Steps.GetCinemasStep>()
+						.AddTransient<Steps.GetListingsLastModifiedStep>()
+						.AddTransient<Steps.SaveCinemasStep>()
+						.AddTransient<Steps.SleepStep>()
+						.AddTransient<Steps.TestDatabaseConnectivityStep>()
+						.AddTransient<Workflows.StartJaegerTrace>()
+						.AddTransient<Workflows.StopJaegerTrace>();
+
+					services
+						.AddWorkflow()
 						.AddHostedService<HostedService>();
 				});
 

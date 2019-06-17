@@ -15,17 +15,17 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 {
 	public abstract class Client : IClient
 	{
-		private readonly ILogger? _logger;
-		private readonly ITracer? _tracer;
+		private readonly ILogger _logger;
+		private readonly ITracer _tracer;
 		private readonly HttpClient _httpClient;
 
 		protected Client(
-			ILogger<Client>? logger,
-			ITracer? tracer,
+			ILogger<Client> logger,
+			ITracer tracer,
 			IHttpClientFactory httpClientFactory)
 		{
-			_logger = logger;
-			_tracer = tracer;
+			_logger = Guard.Argument(() => logger).NotNull().Value;
+			_tracer = Guard.Argument(() => tracer).NotNull().Value;
 
 			Guard.Argument(() => httpClientFactory).NotNull();
 
@@ -52,13 +52,13 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 				.Require(u => !u.IsAbsoluteUri, _ => nameof(relativeUri) + " must be a relative URI")
 				.Require(u => !string.IsNullOrWhiteSpace(u.OriginalString), _ => nameof(relativeUri) + " is blank");
 
-			using var scope = _tracer?.BuildDefaultSpan(filePath: filePath, methodName: methodName)
+			using var scope = _tracer.BuildDefaultSpan(filePath: filePath, methodName: methodName)
 						.WithTag(nameof(httpMethod), httpMethod.Method)
 						.WithTag(nameof(relativeUri), relativeUri.OriginalString)
 						.WithTag(nameof(body), body)
 						.StartActive(finishSpanOnDispose: true);
 
-			_logger?.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(httpMethod), httpMethod.Method, nameof(relativeUri), relativeUri.OriginalString, nameof(body), body?.Truncate());
+			_logger.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(httpMethod), httpMethod.Method, nameof(relativeUri), relativeUri.OriginalString, nameof(body), body?.Truncate());
 
 			var httpRequestMessage = new HttpRequestMessage(httpMethod, relativeUri);
 
@@ -77,9 +77,9 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 			}
 			catch (Exception ex)
 			{
-				scope?.Span.Log(nameof(ex), ex.ToJsonString());
+				scope.Span.Log(nameof(ex), ex.ToJsonString());
 
-				_logger?.LogCritical(ex, "{0}={1}, {2}={3}, {4}={5}", nameof(httpMethod), httpMethod.Method, nameof(relativeUri), relativeUri.OriginalString, nameof(body), body);
+				_logger.LogCritical(ex, "{0}={1}, {2}={3}, {4}={5}", nameof(httpMethod), httpMethod.Method, nameof(relativeUri), relativeUri.OriginalString, nameof(body), body);
 				return default;
 			}
 
@@ -92,7 +92,7 @@ namespace MovieTimes.CineworldService.Clients.Concrete
 				nameof(responseContent), responseContent,
 				nameof(responseHeaders), responseHeaders.ToJsonString());
 
-			_logger?.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(responseStatusCode), responseStatusCode, nameof(responseContent), responseContent.Truncate(), nameof(responseHeaders), responseHeaders.ToJsonString());
+			_logger.LogInformation("{0}={1}, {2}={3}, {4}={5}", nameof(responseStatusCode), responseStatusCode, nameof(responseContent), responseContent.Truncate(), nameof(responseHeaders), responseHeaders.ToJsonString());
 
 			return (responseStatusCode, responseContent, responseHeaders);
 		}
