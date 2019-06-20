@@ -27,7 +27,7 @@ services:
   cineworldservice:
     image: eassbhhtgu/movietimes-cineworldservice:latest
     environment:
-    - ASPNETCORE_ENVIRONMENT=Production
+    - NETCORE_ENVIRONMENT=Production
     depends_on:
     - jaeger
     - mariadb

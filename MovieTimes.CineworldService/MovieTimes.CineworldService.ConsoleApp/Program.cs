@@ -28,7 +28,7 @@ namespace MovieTimes.CineworldService.ConsoleApp
 						hostBuilderContext.HostingEnvironment.ApplicationName = System.Reflection.Assembly.GetAssembly(typeof(Program)).GetName().Name;
 					}
 
-					var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Production;
+					var environmentName = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT") ?? Environments.Production;
 
 					hostBuilderContext.HostingEnvironment.EnvironmentName = environmentName;
 
