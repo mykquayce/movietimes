@@ -1,5 +1,6 @@
 ﻿using Dawn;
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -23,7 +24,7 @@ namespace MovieTimes.MovieDetailsService.Clients.Concrete
 			Guard.Argument(() => _httpClient.BaseAddress.OriginalString).NotNull();
 		}
 
-		public async Task<(HttpStatusCode statusCode, HttpResponseHeaders headers, string content)> SendAsync(
+		public async Task<(HttpStatusCode statusCode, HttpResponseHeaders headers, Stream content)> SendAsync(
 			HttpMethod method,
 			Uri relativeUri)
 		{
@@ -41,7 +42,7 @@ namespace MovieTimes.MovieDetailsService.Clients.Concrete
 				return (
 					response.StatusCode,
 					response.Headers,
-					await response?.Content?.ReadAsStringAsync());
+					await response.Content.ReadAsStreamAsync());
 			}
 			catch (Exception ex)
 			{
@@ -51,7 +52,7 @@ namespace MovieTimes.MovieDetailsService.Clients.Concrete
 			}
 		}
 
-		public Task<(HttpStatusCode statusCode, HttpResponseHeaders headers, string content)> SendAsync(
+		public Task<(HttpStatusCode statusCode, HttpResponseHeaders headers, Stream content)> SendAsync(
 			HttpMethod method,
 			string relativeUriString)
 		{

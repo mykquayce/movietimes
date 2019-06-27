@@ -2,13 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Helpers.MySql" Version="1.0.5-alpha" />
+    <PackageReference Include="System.Text.Json" Version="4.6.0-preview6.19303.8" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MovieTimes.MovieDetailsService.Clients\MovieTimes.MovieDetailsService.Clients.csproj" />
     <ProjectReference Include="..\MovieTimes.MovieDetailsService.Models\MovieTimes.MovieDetailsService.Models.csproj" />
   </ItemGroup>
 

@@ -1,47 +1,85 @@
-using Microsoft.Extensions.Options;
 using Moq;
-using MovieTimes.MovieDetailsService.Clients;
 using MovieTimes.MovieDetailsService.Clients.Concrete;
-using MovieTimes.MovieDetailsService.Configuration;
-using NUnit.Framework;
+using MovieTimes.MovieDetailsService.Models.Generated.TheMovieDb.Search;
 using System;
+using System.IO;
 using System.Net.Http;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Xunit;
 
-namespace Tests
+namespace MovieTimes.MovieDetailsService.Clients.Tests
 {
-	public class TheMovieDbClientTests
+	public class TheMovieDbClientTests : IDisposable
 	{
-		private ITheMovieDbClient _client;
+		private readonly ITheMovieDbClient _client;
+		private readonly HttpClient _httpClient;
 
-		[Test, Order(1)]
-		public void TheMovieDbClientTests_Constructor()
+		public TheMovieDbClientTests()
 		{
-			var client = new HttpClient
+			_httpClient = new HttpClient
 			{
 				BaseAddress = new Uri("https://api.themoviedb.org/", UriKind.Absolute),
 			};
 
-			var httpClientFactory = Mock.Of<IHttpClientFactory>(f => f.CreateClient(It.IsAny<string>()) == client);
+			var httpClientFactoryMock = new Mock<IHttpClientFactory>(MockBehavior.Strict);
 
-			var settings = new TheMovieDbSettings { ApiKey = "40d01b496d7c0a0f2e9337669ac3fbbd", };
+			httpClientFactoryMock
+				.Setup(f => f.CreateClient(It.Is<string>(s => s == nameof(TheMovieDbClient))))
+				.Returns(_httpClient);
 
-			var settingsOptions = Mock.Of<IOptions<TheMovieDbSettings>>(o => o.Value == settings);
-
-			_client = new TheMovieDbClient(httpClientFactory, settingsOptions);
-
-			Assert.IsNotNull(_client);
+			_client = new TheMovieDbClient(httpClientFactoryMock.Object, "40d01b496d7c0a0f2e9337669ac3fbbd");
 		}
 
-		[Test]
-		[TestCase("lego")]
-		public async Task TheMovieDbClientTests_SearchAsync(string query)
+		public void Dispose()
 		{
-			var actual = await _client.SearchAsync(query);
+			_httpClient?.Dispose();
+		}
 
-			Assert.IsNotNull(actual);
-			Assert.IsNotEmpty(actual);
-			Assert.AreEqual('{', actual[0]);
+		[Theory]
+		[InlineData("lego", 2019)]
+		public async Task TheMovieDbClientTests_SearchAsync(string query, int year)
+		{
+			await foreach(var result in _client.SearchAsync(query, year))
+			{
+				Assert.NotNull(result);
+				Assert.InRange(result.Id, 1, int.MaxValue);
+				Assert.InRange(result.Popularity, 0d, double.MaxValue);
+				Assert.NotNull(result.Title);
+				Assert.InRange(result.ReleaseDate, new DateTime(1900, 1, 1), new DateTime(year + 1, 1, 1));
+			}
+		}
+
+		[Theory]
+		[InlineData(280217)]
+		public async Task TheMovieDbClientTests_DetailsAsync(int id)
+		{
+			var detail = await _client.DetailsAsync(id);
+
+			Assert.NotNull(detail.Title);
+			Assert.InRange(detail.Popularity, 0d, double.MaxValue);
+			Assert.NotNull(detail.Runtime);
+			Assert.InRange(detail.Runtime?.TotalMinutes ?? 0d, 1, 100_000);
+		}
+
+		[Fact]
+		public async Task Test()
+		{
+			var json = @"{""page"":1,""total_results"":1,""total_pages"":1,""results"":[{""vote_count"":55,""id"":533642,""video"":false,""vote_average"":5.7,""title"":""Child's Play"",""popularity"":84.239,""poster_path"":""\/xECBpdm4OXXlLajAlcvopXZFiQD.jpg"",""original_language"":""en"",""original_title"":""Child's Play"",""genre_ids"":[27],""backdrop_path"":""\/8Vjfen3Jit0nsMtu8huT09UqmsS.jpg"",""adult"":false,""overview"":""The story follows a mother named Karen, who gives her son Andy a toy doll for his birthday, unaware of its sinister nature."",""release_date"":""2019-06-19""}]}";
+
+			var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+
+			Search search;
+
+			using (var stream = new MemoryStream(bytes))
+			{
+				search = await JsonSerializer.ReadAsync<Search>(stream);
+			}
+
+			Assert.NotNull(search);
+			Assert.NotEmpty(search.results);
+			Assert.Single(search.results);
+			Assert.All(search.results, Assert.NotNull);
 		}
 	}
 }

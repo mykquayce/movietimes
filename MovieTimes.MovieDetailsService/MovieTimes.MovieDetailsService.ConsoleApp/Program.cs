@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Threading;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace MovieTimes.MovieDetailsService.ConsoleApp
@@ -23,7 +24,7 @@ namespace MovieTimes.MovieDetailsService.ConsoleApp
 						hostBuilderContext.HostingEnvironment.ApplicationName = System.Reflection.Assembly.GetAssembly(typeof(Program)).GetName().Name;
 					}
 
-					var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Production;
+					var environmentName = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT") ?? Environments.Production;
 
 					hostBuilderContext.HostingEnvironment.EnvironmentName = environmentName;
 
@@ -31,8 +32,8 @@ namespace MovieTimes.MovieDetailsService.ConsoleApp
 						.SetBasePath(Environment.CurrentDirectory)
 						.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 						.AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
-						.AddDockerSecret("MySqlCineworldUser", optional: hostBuilderContext.HostingEnvironment.IsDevelopment(), reloadOnChange: true)
-						.AddDockerSecret("MySqlCineworldPassword", optional: hostBuilderContext.HostingEnvironment.IsDevelopment(), reloadOnChange: true);
+						.AddDockerSecret("MySqlCineworldPassword", optional: hostBuilderContext.HostingEnvironment.IsDevelopment(), reloadOnChange: true)
+						.AddEnvironmentVariables();
 				});
 
 			hostBuilder
@@ -48,51 +49,70 @@ namespace MovieTimes.MovieDetailsService.ConsoleApp
 			hostBuilder
 				.ConfigureServices((hostBuilderContext, services) =>
 				{
-					var dbSettings = hostBuilderContext.Configuration
-						.GetSection(nameof(Configuration.DbSettings))
-						.Get<Configuration.DbSettings>();
+					services
+						.AddHttpClient(
+							nameof(Clients.Concrete.TheMovieDbClient),
+							(_, client) =>
+							{
+								var uriSettings = hostBuilderContext.Configuration
+									.GetSection(nameof(Configuration.Uris))
+									.Get<Configuration.Uris>();
 
-					var connectionString = dbSettings.ToString();
+								client.Timeout = TimeSpan.FromSeconds(10);
+								client.BaseAddress = new Uri(uriSettings.TheMovieDbApiUri, UriKind.Absolute);
+								client.DefaultRequestHeaders.Accept.Clear();
+								client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+							})
+						.ConfigurePrimaryHttpMessageHandler(() =>
+						{
+							return new HttpClientHandler { AllowAutoRedirect = false, };
+						});
+
+					services
+						.AddTransient<Clients.ITheMovieDbClient>(serviceProvider =>
+						{
+							var settings = hostBuilderContext.Configuration
+								.GetSection(nameof(Configuration.TheMovieDbSettings))
+								.Get<Configuration.TheMovieDbSettings>();
+
+							Guard.Argument(() => settings).NotNull();
+							Guard.Argument(() => settings.ApiKey).NotNull().NotEmpty().NotWhiteSpace();
+
+							var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+
+							return new Clients.Concrete.TheMovieDbClient(httpClientFactory, settings.ApiKey);
+						});
+
+					services
+						.AddTransient<Services.ITheMovieDbService, Services.Concrete.TheMovieDbService>();
 
 					services
 						.AddTransient<Repositories.IRepository>(serviceProvider =>
 						{
+							var dbSettings = hostBuilderContext.Configuration
+								.GetSection(nameof(Configuration.DbSettings))
+								.Get<Configuration.DbSettings>();
+
+							var connectionString = dbSettings.ToString();
+
 							var logger = serviceProvider.GetRequiredService<ILogger<Helpers.MySql.RepositoryBase>>();
 
 							return new Repositories.Concrete.Repository(connectionString, logger);
 						});
 
 					services
+						.AddTransient<Steps.GetMoviesMissingMappingStep>()
+						.AddTransient<Steps.GetRuntimeStep>()
+						.AddTransient<Steps.SaveStep>()
+						.AddTransient<Steps.SleepStep>()
+						.AddTransient<Steps.TitleSanitizationStep>();
+
+					services
+						.AddWorkflow()
 						.AddHostedService<HostedService>();
 				});
 
 			return hostBuilder.RunConsoleAsync();
-		}
-	}
-
-	public class HostedService : IHostedService
-	{
-		private readonly Repositories.IRepository _repository;
-
-		public HostedService(
-			Repositories.IRepository repository)
-		{
-			Guard.Argument(() => repository).NotNull();
-		}
-
-		public async Task StartAsync(CancellationToken cancellationToken)
-		{
-			await foreach ((string title, short year) in _repository.GetMoviesMissingDetailsAsync())
-			{
-
-			}
-
-			throw new NotImplementedException();
-		}
-
-		public Task StopAsync(CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

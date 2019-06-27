@@ -1,10 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using MovieTimes.MovieDetailsService.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MovieTimes.MovieDetailsService.Clients
 {
 	public interface ITheMovieDbClient
 	{
-		Task<string> DetailsAsync(int id);
-		Task<string> SearchAsync(string query);
+		Task<IMovieDetails> DetailsAsync(int id);
+		IAsyncEnumerable<ISearchResult> SearchAsync(string query, int year);
 	}
 }

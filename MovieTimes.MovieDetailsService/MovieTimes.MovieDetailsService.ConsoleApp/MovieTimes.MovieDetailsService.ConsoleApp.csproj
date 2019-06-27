@@ -6,16 +6,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Helpers.DockerSecrets" Version="1.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.0.0-preview5.19227.9" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0-preview5.19227.9" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0-preview5.19227.9" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.0.0-preview5.19227.9" />
+    <PackageReference Include="Helpers.DockerSecrets" Version="1.0.3-preview" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.0.0-preview6.19304.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0-preview6.19304.6" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0-preview6.19304.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.0.0-preview6.19304.6" />
+    <PackageReference Include="WorkflowCore" Version="1.9.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MovieTimes.MovieDetailsService.Configuration\MovieTimes.MovieDetailsService.Configuration.csproj" />
+    <ProjectReference Include="..\MovieTimes.MovieDetailsService.Models\MovieTimes.MovieDetailsService.Models.csproj" />
     <ProjectReference Include="..\MovieTimes.MovieDetailsService.Repositories\MovieTimes.MovieDetailsService.Repositories.csproj" />
+    <ProjectReference Include="..\MovieTimes.MovieDetailsService.Steps\MovieTimes.MovieDetailsService.Steps.csproj" />
+    <ProjectReference Include="..\MovieTimes.MovieDetailsService.Workflows\MovieTimes.MovieDetailsService.Workflows.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,14 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Helpers.MySql" Version="1.0.5-alpha" />
+    <PackageReference Include="WorkflowCore" Version="1.9.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MovieTimes.MovieDetailsService.Models\MovieTimes.MovieDetailsService.Models.csproj" />
+    <ProjectReference Include="..\MovieTimes.MovieDetailsService.Steps\MovieTimes.MovieDetailsService.Steps.csproj" />
   </ItemGroup>
 
 </Project>
