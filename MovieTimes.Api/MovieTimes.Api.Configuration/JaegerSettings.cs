@@ -1,8 +1,10 @@
-﻿namespace MovieTimes.Api.Configuration
+﻿using System.Collections.Generic;
+
+namespace MovieTimes.Api.Configuration
 {
 	public class JaegerSettings
 	{
-		public string? Host { get; set; }
-		public int Port { get; set; }
+		public string Host { get; set; } = "localhost";
+		public int Port { get; set; } = 6681;
 	}
 }

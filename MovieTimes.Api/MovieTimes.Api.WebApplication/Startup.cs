@@ -54,7 +54,7 @@ namespace MovieTimes.Api.WebApplication
 			var jaegerSettings = _configuration.GetSection(nameof(Configuration.JaegerSettings)).Get<Configuration.JaegerSettings>();
 
 			services
-				.AddJaegerTracing(_applicationName, jaegerSettings?.Host, jaegerSettings?.Port ?? 6831);
+				.AddJaegerTracing(_applicationName, jaegerSettings.Host, jaegerSettings.Port);
 
 			services
 				.AddTransient<Repositories.ICineworldRepository>(serviceProvider =>
