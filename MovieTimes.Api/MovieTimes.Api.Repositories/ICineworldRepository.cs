@@ -15,6 +15,7 @@ namespace MovieTimes.Api.Repositories
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,
 			TimesOfDay timesOfDay,
-			ICollection<string> searchTerms);
+			ICollection<string> searchTerms,
+			int weekCount);
 	}
 }

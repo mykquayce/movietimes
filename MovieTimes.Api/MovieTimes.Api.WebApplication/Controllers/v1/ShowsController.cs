@@ -34,7 +34,8 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 			[FromQuery(Name = "cinema")] ICollection<string> cinemas,
 			[FromQuery(Name = "dayofweek")] ICollection<Models.Enums.DaysOfWeek> daysOfWeeks,
 			[FromQuery(Name = "timeofday")] ICollection<Models.Enums.TimesOfDay> timesOfDays,
-			[FromQuery(Name = "title")] ICollection<string> searchTerms)
+			[FromQuery(Name = "title")] ICollection<string> searchTerms,
+			[FromQuery(Name = "weekCount")] int weekCount)
 		{
 			var daysOfWeek = daysOfWeeks.Aggregate(seed: Models.Enums.DaysOfWeek.None, (curr, sum) => sum |= curr);
 			var timesOfDay = timesOfDays.Aggregate(seed: Models.Enums.TimesOfDay.None, (curr, sum) => sum |= curr);
@@ -64,7 +65,7 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 				cinemaIds = new short[0];
 			}
 
-			var shows = await _cineworldRepository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0]);
+			var shows = await _cineworldRepository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0], weekCount);
 
 			return Ok(from s in shows
 					  orderby s.cinemaName, s.dateTime, s.title

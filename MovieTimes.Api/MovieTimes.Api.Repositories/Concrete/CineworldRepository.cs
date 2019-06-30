@@ -67,7 +67,8 @@ namespace MovieTimes.Api.Repositories.Concrete
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,
 			TimesOfDay timesOfDay,
-			ICollection<string> searchTerms)
+			ICollection<string> searchTerms,
+			int weekCount)
 		{
 			Guard.Argument(() => cinemaIds).NotNull();
 			Guard.Argument(() => searchTerms).NotNull();
@@ -94,6 +95,10 @@ namespace MovieTimes.Api.Repositories.Concrete
 				? "1 = 1"
 				: "DAYNAME(s.time) IN @daysOfWeek";
 
+			var dateRangeSql = weekCount <= 0
+				? "1 = 1"
+				: $"s.time BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL {weekCount:D} WEEK)";
+
 			var sql = $@"SELECT c.id cinemaId, c.name cinemaName, s.time, f.title
 					FROM cineworld.cinema c
 						JOIN cineworld.show s ON c.id = s.cinemaId
@@ -102,6 +107,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 						AND {dayNameSql}
 						AND {SqlFromTimesOfDay(timesOfDay)}
 						AND {SqlFromSearchTerms(searchTerms)}
+						AND {dateRangeSql}
 						ORDER BY c.name, s.time, f.title;";
 
 			var @params = new

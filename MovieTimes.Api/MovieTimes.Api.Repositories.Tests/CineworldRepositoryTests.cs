@@ -40,19 +40,20 @@ namespace MovieTimes.Api.Repositories.Tests
 		}
 
 		[Theory]
-		[InlineData(new[] { (short)23, }, DaysOfWeek.Monday, TimesOfDay.Morning | TimesOfDay.Afternoon, new[] { "dark", "phoenix", })]
+		[InlineData(new[] { (short)23, }, DaysOfWeek.Monday, TimesOfDay.Morning | TimesOfDay.Afternoon, new[] { "dark", "phoenix", }, 0)]
 		public async Task CineworldRepositoryTests_GetShowsAsync(
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,
 			TimesOfDay timesOfDay,
-			ICollection<string> searchTerms)
+			ICollection<string> searchTerms,
+			int weekCount)
 		{
 			// Arrange
 			var minDate = DateTime.UtcNow.Date;
 			var maxDate = minDate.AddDays(100);
 
 			// Act
-			var shows = await _repository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms);
+			var shows = await _repository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms, weekCount);
 
 			// Assert
 			Assert.NotNull(shows);
