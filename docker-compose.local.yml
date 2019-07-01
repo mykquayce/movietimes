@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+    - 5775:5775/tcp
+    - 16686:16686/tcp
+    volumes:
+    - jaeger-volume:/tmp:rw
+
+  mariadb:
+    image: mariadb:latest
+    ports:
+    - 3306:3306/tcp
+    environment:
+    - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    - MYSQL_DATABASE=cineworld
+    - MYSQL_USER=movietimes
+    - MYSQL_PASSWORD=xiebeiyoothohYaidieroh8ahchohphi
+    volumes:
+    - mariadb-volume:/var/lib/mysql:rw
+    - ./MovieTimes.Db:/docker-entrypoint-initdb.d
+
+volumes:
+  jaeger-volume: {}
+  mariadb-volume: {}
