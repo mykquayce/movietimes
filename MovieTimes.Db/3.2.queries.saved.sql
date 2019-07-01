@@ -1,0 +1,5 @@
+CREATE TABLE `queries`.`saved` (
+  `id` SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `query` VARCHAR(200) NOT NULL,
+  PRIMARY KEY (`id`)
+);
