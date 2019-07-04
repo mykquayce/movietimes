@@ -23,13 +23,13 @@ namespace MovieTimes.CineworldService.Steps
 		}
 
 		public Models.Generated.cinemas? Cinemas { get; private set; }
-		public ISpan? Span { get; set; }
+		public IScope? Scope { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
 			using var scope = _tracer
 				.BuildDefaultSpan()
-				.AsChildOf(Span)
+				.AsChildOf(Scope?.Span)
 				.StartActive(finishSpanOnDispose: true);
 
 			Cinemas = await _cineworldService.GetCinemasAsync();

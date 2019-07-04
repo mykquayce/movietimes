@@ -23,18 +23,20 @@ namespace MovieTimes.CineworldService.Steps
 		}
 
 		public ConnectionState? ConnectionState { get; private set; }
-		public ISpan? Span { get; set; }
+		public IScope? Scope { get; set; }
 
 		public Task<ExecutionResult> RunAsync(
 			IStepExecutionContext context)
 		{
 			using var scope = _tracer
 				.BuildDefaultSpan()
-				.AsChildOf(Span)
+				.AsChildOf(Scope?.Span)
 				.StartActive(finishSpanOnDispose: true);
 
 			_cineworldRepository.Connect();
 			ConnectionState = _cineworldRepository.ConnectionState;
+
+			scope.Span.Log(nameof(ConnectionState), ConnectionState);
 
 			return Task.FromResult(ExecutionResult.Next());
 		}

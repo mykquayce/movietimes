@@ -22,22 +22,19 @@ namespace MovieTimes.CineworldService.Steps
 		}
 
 		public Models.Generated.cinemas? Cinemas { get; private set; }
-		public ISpan? Span { get; set; }
+		public IScope? Scope { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
-			if (Cinemas == default
-				|| Cinemas.cinema.Count == 0)
-			{
-				return ExecutionResult.Next();
-			}
-
 			using var _ = _tracer
 				.BuildDefaultSpan()
-				.AsChildOf(Span)
+				.AsChildOf(Scope?.Span)
 				.StartActive(finishSpanOnDispose: true);
 
-			await _cineworldRepository.SaveCinemasAsync(Cinemas);
+			if (Cinemas?.cinema.Count > 0)
+			{
+				await _cineworldRepository.SaveCinemasAsync(Cinemas);
+			}
 
 			return ExecutionResult.Next();
 		}

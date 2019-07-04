@@ -23,13 +23,13 @@ namespace MovieTimes.CineworldService.Steps
 		}
 
 		public DateTime LastModified { get; private set; }
-		public ISpan? Span { get; set; }
+		public IScope? Scope { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
 			using var scope = _tracer
 				.BuildDefaultSpan()
-				.AsChildOf(Span)
+				.AsChildOf(Scope?.Span)
 				.StartActive(finishSpanOnDispose: true);
 
 			LastModified = await _cineworldClient.GetListingsLastModifiedAsync();

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using OpenTracing;
+using System;
 using System.Data;
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -13,12 +15,15 @@ namespace MovieTimes.CineworldService.Workflows
 		public void Build(IWorkflowBuilder<Models.PersistenceData> builder)
 		{
 			builder
-				.StartWith(context => ExecutionResult.Next())
+				.StartWith<BeginJaegerTraceStep>()
+					.Input(step => step.OperationName, _ => "Get Cineworld listings")
+					.Output(data => data.Scope, step => step.Scope)
 
 				// Check database connectivity
 				.While(data => (data.ConnectionState & ConnectionState.Open) == 0)
 					.Do(nested => nested
 						.StartWith<Steps.TestDatabaseConnectivityStep>()
+							.Input(step => step.Scope, step => step.Scope)
 							.Output(data => data.ConnectionState, step => step.ConnectionState)
 
 						.If(data => (data.ConnectionState & ConnectionState.Open) == 0)
@@ -29,29 +34,72 @@ namespace MovieTimes.CineworldService.Workflows
 
 				// Get last-modified date
 				.Then<Steps.GetListingsLastModifiedStep>()
+					.Input(step => step.Scope, step => step.Scope)
 					.Output(data => data.CurrentLastModified, step => step.LastModified)
 
 				// If it's older than last time
 				.If(data => data.PreviousLastModified != default && data.CurrentLastModified < data.PreviousLastModified)
 					.Do(then => then
-						.StartWith(context => ExecutionResult.Next())
+						.StartWith<StopJaegerTraceStep>()
+							.Input(step => step.Scope, step => step.Scope)
+
 						.EndWorkflow()
 					)
 
 				// Get the listings
 				.Then<Steps.GetCinemasStep>()
+					.Input(step => step.Scope, step => step.Scope)
 					.Output(data => data.Cinemas, step => step.Cinemas)
 
 				// Save the listings
 				.Then<Steps.SaveCinemasStep>()
 					.Input(step => step.Cinemas, data => data.Cinemas)
+					.Input(step => step.Scope, step => step.Scope)
 
-				// Save the last-modified date
-				.Then<Steps.CopyValueStep>()
-					.Input(step => step.PlaceHolder, data => data.CurrentLastModified)
-					.Output(data => data.PreviousLastModified, step => step.PlaceHolder)
+				.Then<StopJaegerTraceStep>()
+					.Input(step => step.Scope, step => step.Scope)
 
 				.EndWorkflow();
+		}
+	}
+
+	public class BeginJaegerTraceStep : IStepBody
+	{
+		private readonly ITracer _tracer;
+
+		public BeginJaegerTraceStep(
+			ITracer tracer)
+		{
+			_tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
+		}
+
+		public string? OperationName { get; set; }
+		public IScope? Scope { get; set; }
+
+		public Task<ExecutionResult> RunAsync(IStepExecutionContext context)
+		{
+			if (string.IsNullOrWhiteSpace(OperationName)) throw new ArgumentNullException(nameof(OperationName));
+
+			Scope = _tracer
+				.BuildSpan(OperationName)
+				.StartActive(finishSpanOnDispose: false);
+
+			_tracer.ScopeManager.Activate(Scope.Span, finishSpanOnDispose: false);
+
+			return Task.FromResult(ExecutionResult.Next());
+		}
+	}
+
+	public class StopJaegerTraceStep : IStepBody
+	{
+		public IScope? Scope { get; set; }
+
+		public Task<ExecutionResult> RunAsync(IStepExecutionContext context)
+		{
+			Scope?.Span?.Finish();
+			Scope?.Dispose();
+
+			return Task.FromResult(ExecutionResult.Next());
 		}
 	}
 }
