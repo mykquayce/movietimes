@@ -10,5 +10,7 @@
 
 		public string ConnectionString =>
 			$"server={Server};port={Port:D};user id={UserId};password={Password};database={Database};";
+
+		public override string ToString() => ConnectionString;
 	}
 }

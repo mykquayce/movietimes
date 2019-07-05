@@ -10,6 +10,8 @@ namespace MovieTimes.CineworldService.Repositories
 		ConnectionState ConnectionState { get; }
 		void Connect();
 		Task<DateTime> GetDateTimeAsync();
+		Task<DateTime?> GetLastModifiedFromLogAsync();
+		Task LogAsync(DateTime lastModified);
 		Task SaveCinemasAsync(cinemas cinemas);
 	}
 }

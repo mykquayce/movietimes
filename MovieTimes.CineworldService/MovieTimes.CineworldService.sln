@@ -25,9 +25,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.CineworldService.Models.Tests", "MovieTimes.CineworldService.Models.Tests\MovieTimes.CineworldService.Models.Tests.csproj", "{5957385B-4D63-4E3F-9DC0-3A1FEA1A668C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.CineworldService.Workflows", "MovieTimes.CineworldService.Workflows\MovieTimes.CineworldService.Workflows.csproj", "{6BBD510F-3F49-4EBE-8AB6-2ABC0A370F08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.CineworldService.Workflows", "MovieTimes.CineworldService.Workflows\MovieTimes.CineworldService.Workflows.csproj", "{6BBD510F-3F49-4EBE-8AB6-2ABC0A370F08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.CineworldService.Steps", "MovieTimes.CineworldService.Steps\MovieTimes.CineworldService.Steps.csproj", "{FCC8510B-53DE-4138-8B92-92FD7B1242A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MovieTimes.CineworldService.Steps", "MovieTimes.CineworldService.Steps\MovieTimes.CineworldService.Steps.csproj", "{FCC8510B-53DE-4138-8B92-92FD7B1242A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieTimes.CineworldService.Repositories.Tests", "MovieTimes.CineworldService.Repositories.Tests\MovieTimes.CineworldService.Repositories.Tests.csproj", "{317CD7B8-2D6E-4C2A-8BEA-3470C0335C93}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{FCC8510B-53DE-4138-8B92-92FD7B1242A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCC8510B-53DE-4138-8B92-92FD7B1242A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCC8510B-53DE-4138-8B92-92FD7B1242A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{317CD7B8-2D6E-4C2A-8BEA-3470C0335C93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{317CD7B8-2D6E-4C2A-8BEA-3470C0335C93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{317CD7B8-2D6E-4C2A-8BEA-3470C0335C93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{317CD7B8-2D6E-4C2A-8BEA-3470C0335C93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -117,6 +117,8 @@ namespace MovieTimes.CineworldService.ConsoleApp
 						.AddTransient<Workflows.StopJaegerTraceStep>()
 						.AddTransient<Steps.GetCinemasStep>()
 						.AddTransient<Steps.GetListingsLastModifiedStep>()
+						.AddTransient<Steps.GetLocalLastModifiedStep>()
+						.AddTransient<Steps.LogStep>()
 						.AddTransient<Steps.SaveCinemasStep>()
 						.AddTransient<Steps.TestDatabaseConnectivityStep>();
 

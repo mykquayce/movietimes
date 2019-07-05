@@ -32,6 +32,53 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 		public new void Connect() => base.Connect();
 		public Task<DateTime> GetDateTimeAsync() => ExecuteScalarAsync<DateTime>("SELECT NOW();");
 
+		public async Task<DateTime?> GetLastModifiedFromLogAsync()
+		{
+			using var scope = _tracer.BuildDefaultSpan()
+				.StartActive(finishSpanOnDispose: true);
+
+			_logger.LogInformation(nameof(GetLastModifiedFromLogAsync));
+
+			var lastModified = await ExecuteScalarAsync<DateTime?>("SELECT `lastModified` FROM `cineworld`.`log` ORDER BY `lastModified` DESC LIMIT 1;");
+
+			if (lastModified.HasValue)
+			{
+				lastModified = DateTime.SpecifyKind(lastModified.Value, DateTimeKind.Utc);
+			}
+
+			scope.Span.Log(nameof(lastModified), lastModified);
+
+			_logger.LogInformation($"{nameof(GetLastModifiedFromLogAsync)}: {lastModified}");
+
+			return lastModified;
+		}
+
+		public async Task LogAsync(DateTime lastModified)
+		{
+			Guard.Argument(() => lastModified)
+				.NotDefault()
+				.Require(dt => dt.Kind == DateTimeKind.Utc, dt => $"{nameof(lastModified)} must be {nameof(DateTimeKind.Utc)}")
+				.InRange(DateTime.UtcNow.Date.AddDays(-3), DateTime.UtcNow);
+
+			using var scope = _tracer.BuildDefaultSpan()
+				.StartActive(finishSpanOnDispose: true);
+
+			scope.Span.Log(nameof(lastModified), lastModified);
+
+			_logger.LogInformation($"{nameof(LogAsync)}: {lastModified:O}");
+
+			try
+			{
+				await ExecuteAsync("INSERT `cineworld`.`log` (lastModified) VALUES(@lastModified);", new { lastModified, });
+			}
+			catch (Exception ex)
+			{
+				ex.Data.Add(nameof(lastModified), lastModified);
+
+				throw;
+			}
+		}
+
 		public async Task SaveCinemasAsync(cinemas cinemas)
 		{
 			var (cinemaCount, filmCount, showCount) = cinemas.GetCounts();
@@ -72,7 +119,7 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 						from c in cinemas.cinema
 						from f in c.listing
 						where f.edi > 0 // Theatre Let
-							group f by f.edi into gg
+						group f by f.edi into gg
 						select new
 						{
 							edi = gg.Key,
@@ -86,7 +133,7 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 					from c in cinemas.cinema
 					from f in c.listing
 					where f.edi > 0 // Theatre Let
-						from s in f.shows
+					from s in f.shows
 					group (c, f, s) by (c.id, f.edi, s.time) into gg
 					select new
 					{

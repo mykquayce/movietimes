@@ -32,13 +32,18 @@ namespace MovieTimes.CineworldService.Workflows
 							)
 					)
 
-				// Get last-modified date
+				// Get the local last-modified date (from the log)
+				.Then<Steps.GetLocalLastModifiedStep>()
+					.Input(step => step.Scope, step => step.Scope)
+					.Output(data => data.LocalLastModified, step => step.LastModified)
+
+				// Get the remote last-modified date (from Cineworld)
 				.Then<Steps.GetListingsLastModifiedStep>()
 					.Input(step => step.Scope, step => step.Scope)
-					.Output(data => data.CurrentLastModified, step => step.LastModified)
+					.Output(data => data.RemoteLastModified, step => step.LastModified)
 
 				// If it's older than last time
-				.If(data => data.PreviousLastModified != default && data.CurrentLastModified < data.PreviousLastModified)
+				.If(data => data.LocalLastModified != default && data.RemoteLastModified <= data.LocalLastModified)
 					.Do(then => then
 						.StartWith<StopJaegerTraceStep>()
 							.Input(step => step.Scope, step => step.Scope)
@@ -54,6 +59,11 @@ namespace MovieTimes.CineworldService.Workflows
 				// Save the listings
 				.Then<Steps.SaveCinemasStep>()
 					.Input(step => step.Cinemas, data => data.Cinemas)
+					.Input(step => step.Scope, step => step.Scope)
+
+				// Log
+				.Then<Steps.LogStep>()
+					.Input(step => step.LastModified, data => data.RemoteLastModified)
 					.Input(step => step.Scope, step => step.Scope)
 
 				.Then<StopJaegerTraceStep>()
