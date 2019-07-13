@@ -19,7 +19,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 			ITracer? tracer,
 			ILogger<CineworldRepository>? logger,
 			string connectionString)
-			: base(connectionString, logger)
+			: base(connectionString)
 		{
 			_tracer = tracer;
 			_logger = logger;
