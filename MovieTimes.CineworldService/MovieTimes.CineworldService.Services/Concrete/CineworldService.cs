@@ -4,10 +4,7 @@ using Microsoft.Extensions.Logging;
 using MovieTimes.CineworldService.Models.Generated;
 using MovieTimes.CineworldService.Models.Helpers;
 using OpenTracing;
-using System;
-using System.IO;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace MovieTimes.CineworldService.Services.Concrete
 {
@@ -16,7 +13,6 @@ namespace MovieTimes.CineworldService.Services.Concrete
 		private readonly ILogger<CineworldService>? _logger;
 		private readonly ITracer? _tracer;
 		private readonly Clients.ICineworldClient _cineworldClient;
-		private readonly XmlSerializer _xmlSerializer;
 
 		public CineworldService(
 			ILogger<CineworldService>? logger,
@@ -27,8 +23,6 @@ namespace MovieTimes.CineworldService.Services.Concrete
 			_tracer = tracer;
 
 			_cineworldClient = Guard.Argument(() => cineworldClient).NotNull().Value;
-
-			_xmlSerializer = new XmlSerializer(typeof(cinemas));
 		}
 
 		public async Task<cinemas> GetCinemasAsync()
@@ -36,31 +30,7 @@ namespace MovieTimes.CineworldService.Services.Concrete
 			using var scope = _tracer?.BuildDefaultSpan()
 				.StartActive(finishSpanOnDispose: true);
 
-			cinemas cinemas;
-			var xml = await _cineworldClient.GetListingsAsync();
-
-			scope?.Span.Log(nameof(xml), xml.Truncate());
-			_logger?.LogInformation($"{nameof(xml)}={xml.Truncate()}");
-
-			using (var reader = new StringReader(xml))
-			{
-				try
-				{
-					cinemas = (cinemas)_xmlSerializer.Deserialize(reader);
-				}
-				catch (Exception ex)
-				{
-					ex.Data.Add(nameof(xml), xml.Truncate());
-
-					scope?.Span.Log(
-						nameof(ex), ex.ToJsonString(),
-						nameof(xml), xml.Truncate());
-
-					_logger?.LogCritical(ex, $"{nameof(xml)}={xml.Truncate()}");
-
-					throw;
-				}
-			}
+			var cinemas = await _cineworldClient.GetListingsAsync();
 
 			var (cinemaCount, filmCount, showCount) = cinemas.GetCounts();
 

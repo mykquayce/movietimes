@@ -22,7 +22,7 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 			string connectionString,
 			ILogger<CineworldRepository> logger,
 			ITracer tracer)
-			: base(connectionString, logger)
+			: base(connectionString)
 		{
 			_logger = Guard.Argument(() => logger).NotNull().Value;
 			_tracer = Guard.Argument(() => tracer).NotNull().Value;
@@ -57,8 +57,7 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 		{
 			Guard.Argument(() => lastModified)
 				.NotDefault()
-				.Require(dt => dt.Kind == DateTimeKind.Utc, dt => $"{nameof(lastModified)} must be {nameof(DateTimeKind.Utc)}")
-				.InRange(DateTime.UtcNow.Date.AddDays(-3), DateTime.UtcNow);
+				.Require(dt => dt.Kind == DateTimeKind.Utc, dt => $"{nameof(lastModified)} must be {nameof(DateTimeKind.Utc)}");
 
 			using var scope = _tracer.BuildDefaultSpan()
 				.StartActive(finishSpanOnDispose: true);

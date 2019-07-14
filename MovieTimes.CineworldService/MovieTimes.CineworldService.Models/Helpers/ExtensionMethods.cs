@@ -1,12 +1,21 @@
 ﻿using MovieTimes.CineworldService.Models.Generated;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace MovieTimes.CineworldService.Models.Helpers
 {
 	public static class ExtensionMethods
 	{
+		private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+		{
+			AllowTrailingCommas = true,
+			IgnoreNullValues = false,
+			PropertyNameCaseInsensitive = true,
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+			WriteIndented = true,
+		};
+
 		public static (int cinemaCount, int filmCount, int showCount) GetCounts(this cinemas cinemas)
 		{
 			return (
@@ -26,11 +35,11 @@ namespace MovieTimes.CineworldService.Models.Helpers
 
 			try
 			{
-				return JsonConvert.SerializeObject(value);
+				return JsonSerializer.ToString(value, _jsonSerializerOptions);
 			}
 			catch
 			{
-				return JsonConvert.SerializeObject(new { value = value.ToString(), });
+				return JsonSerializer.ToString(new { value = value.ToString(), }, _jsonSerializerOptions);
 			}
 		}
 	}

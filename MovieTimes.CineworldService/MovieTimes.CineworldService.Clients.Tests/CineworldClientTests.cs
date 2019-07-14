@@ -1,8 +1,6 @@
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using MovieTimes.CineworldService.Clients.Concrete;
-using OpenTracing;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,25 +8,31 @@ using Xunit;
 
 namespace MovieTimes.CineworldService.Clients.Tests
 {
-	public class CineworldClientTests
+	public class CineworldClientTests : IDisposable
 	{
 		private readonly ICineworldClient _cineworldClient;
+		private readonly HttpClient _httpClient;
 
 		public CineworldClientTests()
 		{
-			var httpClient = new HttpClient { BaseAddress = new Uri("https://www.cineworld.co.uk/", UriKind.Absolute), };
+			_httpClient = new HttpClient { BaseAddress = new Uri("https://www.cineworld.co.uk/", UriKind.Absolute), };
 
 			var httpClientFactoryMock = new Mock<IHttpClientFactory>();
 
 			httpClientFactoryMock
 				.Setup(x => x.CreateClient(It.Is<string>(s => s == "CineworldClient")))
-				.Returns(httpClient);
+				.Returns(_httpClient);
 
 			var uris = new Configuration.Uris { ListingsUri = "/syndication/listings.xml", };
 
 			var urisOptions = Mock.Of<IOptions<Configuration.Uris>>(o => o.Value == uris);
 
 			_cineworldClient = new CineworldClient(logger: default, tracer: default, httpClientFactoryMock.Object, urisOptions);
+		}
+
+		public void Dispose()
+		{
+			_httpClient?.Dispose();
 		}
 
 		[Theory]
@@ -46,19 +50,15 @@ namespace MovieTimes.CineworldService.Clients.Tests
 				DateTime.UtcNow);
 		}
 
-		[Theory]
-		[InlineData(1_024_576, 102_457_600)]
-		public async Task CineworldClientTests_GetListingsAsync_ReturnsAJsonString_BetweenNAndNBytes(
-			int minSize, int maxSize)
+		[Fact]
+		public async Task CineworldClientTests_GetListingsAsync_ReturnsCinemas()
 		{
 			// Act
-			var actual = await _cineworldClient.GetListingsAsync();
+			var cinemas = await _cineworldClient.GetListingsAsync();
 
 			// Assert
-			Assert.NotNull(actual);
-			Assert.NotEmpty(actual);
-			Assert.StartsWith("<", actual);
-			Assert.InRange(actual.Length, minSize, maxSize);
+			Assert.NotNull(cinemas);
+			Assert.NotEmpty(cinemas.cinema);
 		}
 	}
 }
