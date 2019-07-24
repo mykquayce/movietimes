@@ -100,7 +100,7 @@ namespace MovieTimes.Api.WebApplication
 
 			app
 				.UseMiddleware<Helpers.Tracing.Middleware.ErrorHandlingMiddleware>()
-				.UseMiddleware<Helpers.Tracing.Middleware.AttachRequestBodyToTraceMiddleware>()
+				//.UseMiddleware<Helpers.Tracing.Middleware.AttachRequestBodyToTraceMiddleware>()
 				.UseMiddleware<Helpers.Tracing.Middleware.AttachResponseBodyToTraceMiddleware>();
 
 			app.UseEndpoints(endpoints =>
