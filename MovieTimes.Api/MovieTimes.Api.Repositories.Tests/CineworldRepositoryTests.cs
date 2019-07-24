@@ -14,9 +14,7 @@ namespace MovieTimes.Api.Repositories.Tests
 
 		public CineworldRepositoryTests()
 		{
-			var connectionString = $"server=localhost;port=3306;user id=movietimes;password=xiebeiyoothohYaidieroh8ahchohphi;database=cineworld;";
-
-			_repository = new CineworldRepository(tracer: default, logger: default, connectionString);
+			_repository = new CineworldRepository(tracer: default, logger: default, "localhost", port: 3_306, userId: "movietimes", password: "xiebeiyoothohYaidieroh8ahchohphi", database: "cineworld");
 		}
 
 		[Theory]

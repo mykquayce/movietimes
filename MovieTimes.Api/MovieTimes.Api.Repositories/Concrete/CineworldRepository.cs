@@ -18,8 +18,8 @@ namespace MovieTimes.Api.Repositories.Concrete
 		public CineworldRepository(
 			ITracer? tracer,
 			ILogger<CineworldRepository>? logger,
-			string connectionString)
-			: base(connectionString)
+			string server, int port, string userId, string password, string? database = default)
+			: base(server, port, userId, password, database)
 		{
 			_tracer = tracer;
 			_logger = logger;

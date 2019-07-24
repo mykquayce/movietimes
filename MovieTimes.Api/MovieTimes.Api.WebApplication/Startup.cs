@@ -67,19 +67,12 @@ namespace MovieTimes.Api.WebApplication
 						.GetSection(nameof(Configuration.DbSettings))
 						.Get<Configuration.DbSettings>();
 
-					var builder = new MySql.Data.MySqlClient.MySqlConnectionStringBuilder
-					{
-						Server = dbSettings.Server,
-						Port = (uint)dbSettings.Port,
-						UserID = dbSettings.UserId,
-						Password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password,
-						Database = dbSettings.Database,
-					};
+					var password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password;
 
 					var logger = serviceProvider.GetRequiredService<ILogger<Repositories.Concrete.CineworldRepository>>();
 					var tracer = serviceProvider.GetRequiredService<OpenTracing.ITracer>();
 
-					return new Repositories.Concrete.CineworldRepository(tracer, logger, builder.ConnectionString);
+					return new Repositories.Concrete.CineworldRepository(tracer, logger, dbSettings!.Server!, dbSettings.Port, dbSettings!.UserId!, password!, dbSettings!.Database!);
 				});
 
 			services
