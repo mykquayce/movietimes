@@ -1,5 +1,5 @@
 CREATE TABLE `moviedetails`.`movie` (
-  `id` INT UNSIGNED NULL,
+  `id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
   `imdbId` INT UNSIGNED NULL,
   `title` VARCHAR(100) NOT NULL,
   `runtime` TINYINT UNSIGNED NULL,

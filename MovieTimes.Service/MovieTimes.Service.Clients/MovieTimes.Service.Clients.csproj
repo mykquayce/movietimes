@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="WorkflowCore" Version="2.0.0" />
+    <PackageReference Include="Helpers.HttpClient" Version="1.0.6-preview" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MovieTimes.Service.Configuration\MovieTimes.Service.Configuration.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Models\MovieTimes.Service.Models.csproj" />
-    <ProjectReference Include="..\MovieTimes.Service.Steps\MovieTimes.Service.Steps.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,7 @@
-﻿using WorkflowCore.Interface;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
 namespace MovieTimes.Service.Workflows
@@ -12,7 +15,56 @@ namespace MovieTimes.Service.Workflows
 		{
 			builder
 				.StartWith(_ => ExecutionResult.Next())
+					.Name("before")
+
+				.Parallel()
+					.Do(then =>
+						then.StartWith<Steps.GetLatestLogEntryStep>()
+							.Output(data => data.LocalLastModified, step => step.LogEntry != default ? step.LogEntry.LastModified : default)
+					)
+					.Do(then =>
+						then.StartWith<Steps.GetListingsHeadersStep>()
+							.Output(data => data.RemoteLastModified, step => step.HttpHeaders!.LastModified)
+					)
+				.Join()
+
+				// If it's older than last time
+				.If(data => data.LocalLastModified != default && data.RemoteLastModified <= data.LocalLastModified)
+					.Do(then => then
+						.StartWith(_ => ExecutionResult.Next())
+						.EndWorkflow()
+					)
+
+				.Then<Steps.GetListingsStep>()
+					.Output(data => data.Cinemas, step => step.Cinemas)
+
+				.Then<Steps.SaveCinemasStep>()
+					.Input(step => step.Cinemas, data => data.Cinemas)
+
+				.Then<Steps.GetTitlesStep>()
+					.Input(step => step.Cinemas, data => data.Cinemas)
+					.Output(data => data.EdiTitleTuples, step => step.EdiTitleTuples)
+
+				.Then<Steps.FixTitlesStep>()
+					.Input(step => step.EdiTitleTuples, data => data.EdiTitleTuples)
+					.Output(data => data.EdiTitleFormatTuples, step => step.EdiTitleFormatTuples)
+
+				.Then<Steps.SaveTitlesStep>()
+					.Input(step => step.EdiTitleFormatTuples, data => data.EdiTitleFormatTuples)
+
 				.EndWorkflow();
+		}
+	}
+
+	public class OutputStep : IStepBody
+	{
+		public Models.Generated.film? Film { get; set; }
+
+		public Task<ExecutionResult> RunAsync(IStepExecutionContext context)
+		{
+			Console.WriteLine($"{Film!.edi} = {Film!.title}");
+
+			return Task.FromResult(ExecutionResult.Next());
 		}
 	}
 }

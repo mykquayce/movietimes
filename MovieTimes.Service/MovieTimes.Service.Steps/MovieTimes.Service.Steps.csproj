@@ -7,12 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dawn.Guard" Version="1.8.0" />
     <PackageReference Include="WorkflowCore" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MovieTimes.Service.Clients\MovieTimes.Service.Clients.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Models\MovieTimes.Service.Models.csproj" />
-    <ProjectReference Include="..\MovieTimes.Service.Steps\MovieTimes.Service.Steps.csproj" />
+    <ProjectReference Include="..\MovieTimes.Service.Repositories\MovieTimes.Service.Repositories.csproj" />
+    <ProjectReference Include="..\MovieTimes.Service.Services\MovieTimes.Service.Services.csproj" />
   </ItemGroup>
 
 </Project>
