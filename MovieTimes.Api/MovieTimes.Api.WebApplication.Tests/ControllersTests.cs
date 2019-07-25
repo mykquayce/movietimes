@@ -23,7 +23,9 @@ namespace MovieTimes.Api.WebApplication.Tests
 				.UseStartup<Startup>()
 				.ConfigureAppConfiguration(config =>
 				{
-					config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+					config
+						.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+						.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true);
 				})
 				.UseEnvironment(Environments.Development);
 
