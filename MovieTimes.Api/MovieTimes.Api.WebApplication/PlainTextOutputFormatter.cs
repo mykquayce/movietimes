@@ -36,7 +36,7 @@ namespace MovieTimes.Api.WebApplication
 			{
 				foreach (var item in enumerable)
 				{
-					f(item);
+					f(item!);
 				}
 			}
 			else

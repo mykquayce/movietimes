@@ -33,7 +33,7 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 		public async Task<IActionResult> Get(
 			[FromQuery(Name = "name")] IReadOnlyCollection<string>? names = default)
 		{
-			var namesString = string.Join(", ", names);
+			var namesString = (names?.Any() ?? false) ? string.Join(", ", names!) : default;
 
 			using var scope = _tracer.BuildDefaultSpan()
 				.WithTag(nameof(names), namesString)
