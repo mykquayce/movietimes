@@ -26,7 +26,7 @@ namespace MovieTimes.CineworldService.Repositories.Tests
 			var logger = Mock.Of<ILogger<Concrete.CineworldRepository>>();
 			var tracer = BuildTracer();
 
-			_repository = new Concrete.CineworldRepository(dbSettings.ToString(), logger, tracer);
+			_repository = new Concrete.CineworldRepository(logger, tracer, "localhost", 3_306, "movietimes", "xiebeiyoothohYaidieroh8ahchohphi", "cineworld");
 		}
 
 		[Theory]

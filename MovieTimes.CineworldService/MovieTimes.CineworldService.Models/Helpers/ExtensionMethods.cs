@@ -1,7 +1,7 @@
 ﻿using MovieTimes.CineworldService.Models.Generated;
 using System;
 using System.Linq;
-using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace MovieTimes.CineworldService.Models.Helpers
 {
@@ -35,11 +35,11 @@ namespace MovieTimes.CineworldService.Models.Helpers
 
 			try
 			{
-				return JsonSerializer.ToString(value, _jsonSerializerOptions);
+				return JsonSerializer.Serialize(value, _jsonSerializerOptions);
 			}
 			catch
 			{
-				return JsonSerializer.ToString(new { value = value.ToString(), }, _jsonSerializerOptions);
+				return JsonSerializer.Serialize(new { value = value.ToString(), }, _jsonSerializerOptions);
 			}
 		}
 	}

@@ -25,7 +25,7 @@ namespace MovieTimes.CineworldService.ConsoleApp
 				{
 					if (string.IsNullOrWhiteSpace(hostBuilderContext.HostingEnvironment.ApplicationName))
 					{
-						hostBuilderContext.HostingEnvironment.ApplicationName = System.Reflection.Assembly.GetAssembly(typeof(Program)).GetName().Name;
+						hostBuilderContext.HostingEnvironment.ApplicationName = System.Reflection.Assembly.GetAssembly(typeof(Program))?.GetName().Name;
 					}
 
 					var environmentName = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT") ?? Environments.Production;
@@ -69,7 +69,7 @@ namespace MovieTimes.CineworldService.ConsoleApp
 									.Get<Configuration.Uris>();
 
 								client.Timeout = TimeSpan.FromSeconds(10);
-								client.BaseAddress = new Uri(uriSettings.CineworldBaseUri, UriKind.Absolute);
+								client.BaseAddress = new Uri(uriSettings.CineworldBaseUri!, UriKind.Absolute);
 								client.DefaultRequestHeaders.Accept.Clear();
 								client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
 							})
@@ -97,19 +97,12 @@ namespace MovieTimes.CineworldService.ConsoleApp
 								.GetSection(nameof(Configuration.DbSettings))
 								.Get<Configuration.DbSettings>();
 
-							var builder = new MySql.Data.MySqlClient.MySqlConnectionStringBuilder
-							{
-								Server = dbSettings.Server,
-								Port = (uint)dbSettings.Port,
-								UserID = dbSettings.UserId,
-								Password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password,
-								Database = dbSettings.Database,
-							};
-
 							var logger = serviceProvider.GetRequiredService<ILogger<Repositories.Concrete.CineworldRepository>>();
 							var tracer = serviceProvider.GetRequiredService<ITracer>();
 
-							return new Repositories.Concrete.CineworldRepository(builder.ConnectionString, logger, tracer);
+							var password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password!;
+
+							return new Repositories.Concrete.CineworldRepository(logger, tracer, dbSettings.Server!, dbSettings.Port, dbSettings.UserId!, password, dbSettings.Database);
 						});
 
 					services

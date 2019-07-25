@@ -34,7 +34,7 @@ namespace MovieTimes.CineworldService.ConsoleApp
 			return Task.CompletedTask;
 		}
 
-		private void DoWork(object state)
+		private void DoWork(object? state)
 		{
 			var persistenceData = new Models.PersistenceData();
 			_workflowHost.StartWorkflow<Models.PersistenceData>(workflowId: nameof(Workflows.Workflow), data: persistenceData);

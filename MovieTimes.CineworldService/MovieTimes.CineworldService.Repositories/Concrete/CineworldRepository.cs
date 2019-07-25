@@ -19,10 +19,10 @@ namespace MovieTimes.CineworldService.Repositories.Concrete
 		private readonly ITracer _tracer;
 
 		public CineworldRepository(
-			string connectionString,
 			ILogger<CineworldRepository> logger,
-			ITracer tracer)
-			: base(connectionString)
+			ITracer tracer,
+			string server, int port, string userId, string password, string? database = default)
+			: base(server, port, userId, password, database)
 		{
 			_logger = Guard.Argument(() => logger).NotNull().Value;
 			_tracer = Guard.Argument(() => tracer).NotNull().Value;
