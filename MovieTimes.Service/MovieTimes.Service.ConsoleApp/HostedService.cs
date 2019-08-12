@@ -27,7 +27,7 @@ namespace MovieTimes.Service.ConsoleApp
 
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
-			_timer = new Timer(DoWork, state: default, dueTime: TimeSpan.Zero, period: TimeSpan.FromHours(1));
+			_timer = new Timer(DoWork!, state: default, dueTime: TimeSpan.Zero, period: TimeSpan.FromHours(1));
 			return Task.CompletedTask;
 		}
 

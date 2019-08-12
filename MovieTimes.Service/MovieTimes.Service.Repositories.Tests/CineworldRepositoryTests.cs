@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+using Moq;
 using System;
 using System.Globalization;
 using System.IO;
@@ -10,26 +12,25 @@ namespace MovieTimes.Service.Repositories.Tests
 	public class CineworldRepositoryTests
 	{
 		private readonly Repositories.ICineworldRepository _cineworldRepository;
-		private readonly XmlSerializer _xmlSerializer;
 
 		public CineworldRepositoryTests()
 		{
-			var builder = new MySql.Data.MySqlClient.MySqlConnectionStringBuilder
+			var settings = new Helpers.MySql.Models.DbSettings
 			{
 				Server = "localhost",
 				Port = 3_306,
-				UserID = "movietimes",
+				UserId = "movietimes",
 				Password = "xiebeiyoothohYaidieroh8ahchohphi",
 				Database = "cineworld",
 			};
 
-			_cineworldRepository = new Repositories.Concrete.CineworldRepository(builder.ConnectionString);
+			var options = Mock.Of<IOptions<Helpers.MySql.Models.DbSettings>>(o => o.Value == settings);
 
-			_xmlSerializer = new XmlSerializer(typeof(Models.Generated.cinemas));
+			_cineworldRepository = new Repositories.Concrete.CineworldRepository(options);
 		}
 
 		[Theory]
-		[InlineData("2019-07-21T12:33:51Z")]
+		[InlineData("2019-08-12T17:53:23Z")]
 		public async Task CineworldRepositoryTests_Logs(string lastModifiedString)
 		{
 			// Arrange
@@ -45,7 +46,7 @@ namespace MovieTimes.Service.Repositories.Tests
 			// Assert
 			Assert.Equal(
 				lastModified,
-				actual.LastModified);
+				actual!.LastModified);
 
 			// Act
 			await _cineworldRepository.PurgeOldLogsAsync(lastModified);

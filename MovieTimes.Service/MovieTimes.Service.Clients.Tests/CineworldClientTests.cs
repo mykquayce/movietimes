@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Moq;
 using System;
 using System.Net.Http;
@@ -17,7 +18,10 @@ namespace MovieTimes.Service.Clients.Tests
 			_httpClient = new HttpClient { BaseAddress = baseAddress, };
 			var httpClientFactory = Mock.Of<IHttpClientFactory>(f => f.CreateClient(It.IsAny<string>()) == _httpClient);
 
-			_client = new Clients.Concrete.CineworldClient(httpClientFactory);
+			var uris = new Configuration.Uris { ListingsUri = "/syndication/listings.xml", };
+			var options = Mock.Of<IOptions<Configuration.Uris>>(o => o.Value == uris);
+
+			_client = new Clients.Concrete.CineworldClient(options, httpClientFactory);
 		}
 
 		public void Dispose()

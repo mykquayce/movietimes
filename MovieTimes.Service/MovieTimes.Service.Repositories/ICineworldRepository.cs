@@ -5,7 +5,7 @@ namespace MovieTimes.Service.Repositories
 {
 	public interface ICineworldRepository
 	{
-		Task<Models.LogEntry> GetLatestLogEntryAsync();
+		Task<Models.LogEntry?> GetLatestLogEntryAsync();
 		Task LogAsync(Models.LogEntry logEntry);
 		Task PurgeOldLogsAsync(DateTime? max = default);
 		Task PurgeOldShowsAsync(DateTime? max = default);

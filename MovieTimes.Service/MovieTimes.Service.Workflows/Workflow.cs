@@ -35,13 +35,25 @@ namespace MovieTimes.Service.Workflows
 						.EndWorkflow()
 					)
 
+				.Then<Steps.SaveLogEntryStep>()
+					.Input(step => step.LastModified, data => data.RemoteLastModified)
+
 				.Then<Steps.GetListingsStep>()
 					.Output(data => data.Cinemas, step => step.Cinemas)
 
 				.Then<Steps.SaveCinemasStep>()
 					.Input(step => step.Cinemas, data => data.Cinemas)
 
-				.Then<Steps.GetTitlesStep>()
+				.Then<Steps.GetQueriesStep>()
+					.Output(data => data.Queries, step => step.Queries)
+
+				.ForEach(data => data.Queries)
+					.Do(each => each
+						.StartWith<Steps.RunQueryStep>()
+							.Input(step => step.RelativeUri, (_, context) => context.Item as string)
+					)
+
+				/*.Then<Steps.GetTitlesStep>()
 					.Input(step => step.Cinemas, data => data.Cinemas)
 					.Output(data => data.EdiTitleTuples, step => step.EdiTitleTuples)
 
@@ -50,7 +62,7 @@ namespace MovieTimes.Service.Workflows
 					.Output(data => data.EdiTitleFormatTuples, step => step.EdiTitleFormatTuples)
 
 				.Then<Steps.SaveTitlesStep>()
-					.Input(step => step.EdiTitleFormatTuples, data => data.EdiTitleFormatTuples)
+					.Input(step => step.EdiTitleFormatTuples, data => data.EdiTitleFormatTuples)*/
 
 				.EndWorkflow();
 		}

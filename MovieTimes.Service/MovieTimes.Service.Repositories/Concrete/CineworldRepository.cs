@@ -1,4 +1,5 @@
-﻿using MovieTimes.Service.Models;
+﻿using Microsoft.Extensions.Options;
+using MovieTimes.Service.Models;
 using MovieTimes.Service.Models.Generated;
 using MySql.Data.MySqlClient;
 using System;
@@ -9,17 +10,20 @@ namespace MovieTimes.Service.Repositories.Concrete
 {
 	public class CineworldRepository : Helpers.MySql.RepositoryBase, ICineworldRepository
 	{
-		public CineworldRepository(string connectionString)
-			: base(connectionString)
+		public CineworldRepository(IOptions<Helpers.MySql.Models.DbSettings> options)
+			: base(options.Value)
 		{ }
 
-		public async Task<LogEntry> GetLatestLogEntryAsync()
+		public async Task<LogEntry?> GetLatestLogEntryAsync()
 		{
 			var sql = "SELECT `lastModified` FROM `cineworld`.`log` ORDER BY `lastModified` DESC LIMIT 1;";
 
-			var queries = await base.QueryAsync<LogEntry>(sql);
+			await foreach (var logEntry in base.QueryAsync<LogEntry>(sql))
+			{
+				return logEntry;
+			}
 
-			return queries.SingleOrDefault();
+			return default;
 		}
 
 		public Task LogAsync(LogEntry logEntry)
