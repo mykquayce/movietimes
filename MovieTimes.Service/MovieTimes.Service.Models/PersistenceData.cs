@@ -10,5 +10,6 @@ namespace MovieTimes.Service.Models
 		public IEnumerable<(int edi, string title, Formats format)>? EdiTitleFormatTuples { get; set; }
 		public DateTime? LocalLastModified { get; set; }
 		public DateTime? RemoteLastModified { get; set; }
+		public IEnumerable<string>? Queries { get; set; }
 	}
 }

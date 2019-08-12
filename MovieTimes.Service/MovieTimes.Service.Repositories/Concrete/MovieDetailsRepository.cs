@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Options;
 using MovieTimes.Service.Models;
 using MySql.Data.MySqlClient;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MovieTimes.Service.Repositories.Concrete
 {
 	public class MovieDetailsRepository : Helpers.MySql.RepositoryBase, IMovieDetailsRepository
 	{
-		public MovieDetailsRepository(string connectionString)
-			: base(connectionString)
+		public MovieDetailsRepository(IOptions<Helpers.MySql.Models.DbSettings> options)
+			: base(options.Value)
 		{ }
 
 		public async Task SaveSanitizedTitleAsync(int edi, string title, Formats format)

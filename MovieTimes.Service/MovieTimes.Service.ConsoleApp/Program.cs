@@ -20,7 +20,7 @@ namespace MovieTimes.Service.ConsoleApp
 				{
 					if (string.IsNullOrWhiteSpace(hostBuilderContext.HostingEnvironment.ApplicationName))
 					{
-						hostBuilderContext.HostingEnvironment.ApplicationName = System.Reflection.Assembly.GetAssembly(typeof(Program)).GetName().Name;
+						hostBuilderContext.HostingEnvironment.ApplicationName = System.Reflection.Assembly.GetAssembly(typeof(Program))!.GetName().Name;
 					}
 
 					var environmentName = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT") ?? Environments.Production;
@@ -49,6 +49,25 @@ namespace MovieTimes.Service.ConsoleApp
 					// http clients
 					services
 						.AddHttpClient(
+							nameof(Clients.Concrete.ApiClient),
+							(_, client) =>
+							{
+								var uriSettings = hostBuilderContext.Configuration
+									.GetSection(nameof(Configuration.Uris))
+									.Get<Configuration.Uris>();
+
+								client.Timeout = TimeSpan.FromSeconds(1);
+								client.BaseAddress = new Uri(uriSettings.ApiBaseUri!, UriKind.Absolute);
+								client.DefaultRequestHeaders.Accept.Clear();
+								client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+							})
+						.ConfigurePrimaryHttpMessageHandler(() =>
+						{
+							return new HttpClientHandler { AllowAutoRedirect = false, };
+						});
+
+					services
+						.AddHttpClient(
 							nameof(Clients.Concrete.CineworldClient),
 							(_, client) =>
 							{
@@ -57,7 +76,7 @@ namespace MovieTimes.Service.ConsoleApp
 									.Get<Configuration.Uris>();
 
 								client.Timeout = TimeSpan.FromSeconds(10);
-								client.BaseAddress = new Uri(uriSettings.CineworldBaseUri, UriKind.Absolute);
+								client.BaseAddress = new Uri(uriSettings.CineworldBaseUri!, UriKind.Absolute);
 								client.DefaultRequestHeaders.Accept.Clear();
 								client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
 							})
@@ -68,18 +87,22 @@ namespace MovieTimes.Service.ConsoleApp
 
 					// config
 					services
-						.Configure<Configuration.DbSettings>(hostBuilderContext.Configuration.GetSection(nameof(Configuration.DbSettings)))
+						.Configure<Helpers.MySql.Models.DbSettings>(hostBuilderContext.Configuration.GetSection(nameof(Helpers.MySql.Models.DbSettings)))
 						.Configure<Configuration.Uris>(hostBuilderContext.Configuration.GetSection(nameof(Configuration.Uris)));
 
 					// clients
 					services
+						.AddTransient<Clients.IApiClient, Clients.Concrete.ApiClient>()
 						.AddTransient<Clients.ICineworldClient, Clients.Concrete.CineworldClient>();
 
 					// repos
-					var connectionString = GetConnectionString(hostBuilderContext);
+					var dbSettings = hostBuilderContext.Configuration
+						.GetSection(nameof(Helpers.MySql.Models.DbSettings))
+						.Get<Helpers.MySql.Models.DbSettings>();
+
 					services
-						.AddTransient<Repositories.ICineworldRepository>(_ => new Repositories.Concrete.CineworldRepository(connectionString))
-						.AddTransient<Repositories.IMovieDetailsRepository>(_ => new Repositories.Concrete.MovieDetailsRepository(connectionString));
+						.AddTransient<Repositories.ICineworldRepository, Repositories.Concrete.CineworldRepository>()
+						.AddTransient<Repositories.IMovieDetailsRepository, Repositories.Concrete.MovieDetailsRepository>();
 
 					// services
 					services
@@ -89,11 +112,14 @@ namespace MovieTimes.Service.ConsoleApp
 					// steps
 					services
 						.AddTransient<Steps.FixTitlesStep>()
+						.AddTransient<Steps.GetLatestLogEntryStep>()
 						.AddTransient<Steps.GetListingsHeadersStep>()
 						.AddTransient<Steps.GetListingsStep>()
-						.AddTransient<Steps.GetLatestLogEntryStep>()
+						.AddTransient<Steps.GetQueriesStep>()
 						.AddTransient<Steps.GetTitlesStep>()
+						.AddTransient<Steps.RunQueryStep>()
 						.AddTransient<Steps.SaveCinemasStep>()
+						.AddTransient<Steps.SaveLogEntryStep>()
 						.AddTransient<Steps.SaveTitlesStep>();
 
 					services
@@ -103,24 +129,6 @@ namespace MovieTimes.Service.ConsoleApp
 
 			return hostBuilder
 				.RunConsoleAsync();
-		}
-
-		private static string GetConnectionString(HostBuilderContext context)//, string? database = default)
-		{
-			var settings = context.Configuration
-				.GetSection(nameof(Configuration.DbSettings))
-				.Get<Configuration.DbSettings>();
-
-			var builder = new MySql.Data.MySqlClient.MySqlConnectionStringBuilder
-			{
-				//Database = database ?? settings.Database,
-				Password = settings.Password,
-				Port = (uint)settings.Port,
-				Server = settings.Server,
-				UserID = settings.UserId,
-			};
-
-			return builder.ConnectionString;
 		}
 	}
 }

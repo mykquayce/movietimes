@@ -7,10 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Helpers.MySql" Version="1.0.7-preview" />
+    <PackageReference Include="Helpers.MySql" Version="1.1.3-preview" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MovieTimes.Service.Configuration\MovieTimes.Service.Configuration.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Models\MovieTimes.Service.Models.csproj" />
   </ItemGroup>
 
