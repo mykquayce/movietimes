@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Helpers.MySql" Version="1.1.3-preview" />
+    <PackageReference Include="Helpers.MySql" Version="1.1.5-preview" />
   </ItemGroup>
 
   <ItemGroup>
