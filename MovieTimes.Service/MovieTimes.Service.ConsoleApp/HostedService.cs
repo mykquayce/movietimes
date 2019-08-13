@@ -15,9 +15,16 @@ namespace MovieTimes.Service.ConsoleApp
 		{
 			_workflowHost = workflowHost;
 
+			_workflowHost.OnStepError += WorkflowHost_OnStepError;
+
 			_workflowHost.RegisterWorkflow<Workflows.Workflow, Models.PersistenceData>();
 
 			_workflowHost.Start();
+		}
+
+		private void WorkflowHost_OnStepError(WorkflowCore.Models.WorkflowInstance workflow, WorkflowCore.Models.WorkflowStep step, Exception exception)
+		{
+			throw new NotImplementedException();
 		}
 
 		public void Dispose()
