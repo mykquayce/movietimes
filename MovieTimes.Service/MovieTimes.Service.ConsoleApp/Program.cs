@@ -102,6 +102,7 @@ namespace MovieTimes.Service.ConsoleApp
 
 					services
 						.AddTransient<Repositories.ICineworldRepository, Repositories.Concrete.CineworldRepository>()
+						.AddTransient<Repositories.IQueriesRepository, Repositories.Concrete.QueriesRepository>()
 						.AddTransient<Repositories.IMovieDetailsRepository, Repositories.Concrete.MovieDetailsRepository>();
 
 					// services
