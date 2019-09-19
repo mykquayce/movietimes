@@ -7,11 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="Helpers.DockerSecrets" Version="1.0.3-preview" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.0.0-preview6.19304.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0-preview6.19304.6" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0-preview6.19304.6" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.0.0-preview6.19304.6" />
-    <PackageReference Include="WorkflowCore" Version="1.9.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.0.0-rc1.19456.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0-rc1.19456.10" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0-rc1.19456.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.0.0-rc1.19456.10" />
+    <PackageReference Include="WorkflowCore" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
