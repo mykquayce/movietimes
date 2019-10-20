@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -14,6 +15,16 @@ namespace MovieTimes.MovieDetailsService.Clients.Concrete
 	public class TheMovieDbClient : ClientBase, ITheMovieDbClient
 	{
 		private readonly string _apiKey;
+
+		private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+		{
+			AllowTrailingCommas = true,
+			DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+			IgnoreNullValues = false,
+			PropertyNameCaseInsensitive = true,
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+			WriteIndented = true,
+		};
 
 		public TheMovieDbClient(
 			IHttpClientFactory httpClientFactory,
@@ -34,7 +45,7 @@ namespace MovieTimes.MovieDetailsService.Clients.Concrete
 			switch (statusCode)
 			{
 				case HttpStatusCode.OK:
-					return await JsonSerializer.ReadAsync<Details>(content);
+					return await JsonSerializer.DeserializeAsync<Details>(content);
 				default:
 					throw new Exception("Unexpected response from The Movie DB API")
 					{
@@ -61,9 +72,9 @@ namespace MovieTimes.MovieDetailsService.Clients.Concrete
 			switch (statusCode)
 			{
 				case HttpStatusCode.OK:
-					var search = await JsonSerializer.ReadAsync<Search>(content);
+					var search = await JsonSerializer.DeserializeAsync<Search>(content, _jsonSerializerOptions);
 
-					foreach (var result in search.results)
+					foreach (var result in search.results!)
 					{
 						yield return result;
 					}

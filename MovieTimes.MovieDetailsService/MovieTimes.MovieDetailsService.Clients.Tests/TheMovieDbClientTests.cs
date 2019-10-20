@@ -4,7 +4,7 @@ using MovieTimes.MovieDetailsService.Models.Generated.TheMovieDb.Search;
 using System;
 using System.IO;
 using System.Net.Http;
-using System.Text.Json.Serialization;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -14,6 +14,16 @@ namespace MovieTimes.MovieDetailsService.Clients.Tests
 	{
 		private readonly ITheMovieDbClient _client;
 		private readonly HttpClient _httpClient;
+
+		private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+		{
+			AllowTrailingCommas = true,
+			DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
+			IgnoreNullValues = false,
+			PropertyNameCaseInsensitive = true,
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+			WriteIndented = true,
+		};
 
 		public TheMovieDbClientTests()
 		{
@@ -33,7 +43,16 @@ namespace MovieTimes.MovieDetailsService.Clients.Tests
 
 		public void Dispose()
 		{
-			_httpClient?.Dispose();
+			Dispose(disposing: true);
+			GC.SuppressFinalize(obj: this);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if(disposing)
+			{
+				_httpClient?.Dispose();
+			}
 		}
 
 		[Theory]
@@ -73,7 +92,7 @@ namespace MovieTimes.MovieDetailsService.Clients.Tests
 
 			using (var stream = new MemoryStream(bytes))
 			{
-				search = await JsonSerializer.ReadAsync<Search>(stream);
+				search = await JsonSerializer.DeserializeAsync<Search>(stream, _jsonSerializerOptions);
 			}
 
 			Assert.NotNull(search);
