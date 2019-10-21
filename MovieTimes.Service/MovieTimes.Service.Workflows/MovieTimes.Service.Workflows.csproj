@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="WorkflowCore" Version="2.1.1" />
+    <PackageReference Include="WorkflowCore" Version="2.1.2" />
   </ItemGroup>
 
   <ItemGroup>
