@@ -1,3 +1,4 @@
+using Helpers.Cineworld.Models;
 using Microsoft.Extensions.Options;
 using Moq;
 using System;
@@ -58,7 +59,7 @@ namespace MovieTimes.Service.Repositories.Tests
 		{
 			// Arrange
 			var path = Path.Combine("Data", filename);
-			var cinemas = DeserializeFile<Models.Generated.cinemas>(path);
+			var cinemas = DeserializeFile<cinemasType>(path);
 
 			// Act
 			await _cineworldRepository.SaveCinemasAsync(cinemas);

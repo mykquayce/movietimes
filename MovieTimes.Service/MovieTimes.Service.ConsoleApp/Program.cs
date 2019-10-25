@@ -96,11 +96,9 @@ namespace MovieTimes.Service.ConsoleApp
 						.AddTransient<Steps.GetListingsHeadersStep>()
 						.AddTransient<Steps.GetListingsStep>()
 						.AddTransient<Steps.GetQueriesStep>()
-						.AddTransient<Steps.GetTitlesStep>()
 						.AddTransient<Steps.RunQueryStep>()
 						.AddTransient<Steps.SaveCinemasStep>()
-						.AddTransient<Steps.SaveLogEntryStep>()
-						.AddTransient<Steps.SaveTitlesStep>();
+						.AddTransient<Steps.SaveLogEntryStep>();
 
 					services
 						.AddWorkflow()

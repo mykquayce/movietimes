@@ -67,16 +67,4 @@ namespace MovieTimes.Service.Workflows
 				.EndWorkflow();
 		}
 	}
-
-	public class OutputStep : IStepBody
-	{
-		public Models.Generated.film? Film { get; set; }
-
-		public Task<ExecutionResult> RunAsync(IStepExecutionContext context)
-		{
-			Console.WriteLine($"{Film!.edi} = {Film!.title}");
-
-			return Task.FromResult(ExecutionResult.Next());
-		}
-	}
 }
