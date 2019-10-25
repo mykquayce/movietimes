@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Helpers.Cineworld.Models;
+using System;
 using System.Threading.Tasks;
 
 namespace MovieTimes.Service.Repositories
@@ -9,6 +10,6 @@ namespace MovieTimes.Service.Repositories
 		Task LogAsync(Models.LogEntry logEntry);
 		Task PurgeOldLogsAsync(DateTime? max = default);
 		Task PurgeOldShowsAsync(DateTime? max = default);
-		Task SaveCinemasAsync(Models.Generated.cinemas cinemas);
+		Task SaveCinemasAsync(cinemasType cinemas);
 	}
 }

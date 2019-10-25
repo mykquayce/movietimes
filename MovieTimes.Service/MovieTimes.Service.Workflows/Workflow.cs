@@ -24,7 +24,7 @@ namespace MovieTimes.Service.Workflows
 					)
 					.Do(then =>
 						then.StartWith<Steps.GetListingsHeadersStep>()
-							.Output(data => data.RemoteLastModified, step => step.HttpHeaders!.LastModified)
+							.Output(data => data.RemoteLastModified, step => step.LastModified!)
 					)
 				.Join()
 
@@ -65,18 +65,6 @@ namespace MovieTimes.Service.Workflows
 					.Input(step => step.EdiTitleFormatTuples, data => data.EdiTitleFormatTuples)*/
 
 				.EndWorkflow();
-		}
-	}
-
-	public class OutputStep : IStepBody
-	{
-		public Models.Generated.film? Film { get; set; }
-
-		public Task<ExecutionResult> RunAsync(IStepExecutionContext context)
-		{
-			Console.WriteLine($"{Film!.edi} = {Film!.title}");
-
-			return Task.FromResult(ExecutionResult.Next());
 		}
 	}
 }

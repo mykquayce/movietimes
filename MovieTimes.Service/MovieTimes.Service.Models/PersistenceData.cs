@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Helpers.Cineworld.Models;
+using System;
 using System.Collections.Generic;
 
 namespace MovieTimes.Service.Models
 {
 	public class PersistenceData
 	{
-		public Generated.cinemas? Cinemas { get; set; }
+		public cinemasType? Cinemas { get; set; }
 		public IEnumerable<(int edi, string title)>? EdiTitleTuples { get; set; }
 		public IEnumerable<(int edi, string title, Formats format)>? EdiTitleFormatTuples { get; set; }
 		public DateTime? LocalLastModified { get; set; }

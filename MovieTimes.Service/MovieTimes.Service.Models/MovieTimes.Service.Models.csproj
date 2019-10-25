@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Generated\" />
+    <PackageReference Include="Helpers.Cineworld.Models" Version="1.0.2" />
   </ItemGroup>
 
 </Project>

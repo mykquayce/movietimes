@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Helpers.Cineworld" Version="1.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="3.0.0" />
@@ -19,7 +20,6 @@
     <ProjectReference Include="..\MovieTimes.Service.Configuration\MovieTimes.Service.Configuration.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Models\MovieTimes.Service.Models.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Repositories\MovieTimes.Service.Repositories.csproj" />
-    <ProjectReference Include="..\MovieTimes.Service.Services\MovieTimes.Service.Services.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Steps\MovieTimes.Service.Steps.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Workflows\MovieTimes.Service.Workflows.csproj" />
   </ItemGroup>

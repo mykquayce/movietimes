@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Helpers.Cineworld.Models;
+using Microsoft.Extensions.Options;
 using MovieTimes.Service.Models;
-using MovieTimes.Service.Models.Generated;
 using MySql.Data.MySqlClient;
 using System;
 using System.Linq;
@@ -49,7 +49,7 @@ namespace MovieTimes.Service.Repositories.Concrete
 		public Task PurgeOldShowsAsync(DateTime? max = null) =>
 			base.ExecuteAsync("DELETE FROM `cineworld`.`show` WHERE `time` <= @max;", new { max = max ?? DateTime.UtcNow, });
 
-		public async Task SaveCinemasAsync(cinemas cinemas)
+		public async Task SaveCinemasAsync(cinemasType cinemas)
 		{
 			using var transaction = base.BeginTransaction();
 
@@ -68,7 +68,7 @@ namespace MovieTimes.Service.Repositories.Concrete
 					base.ExecuteAsync(
 						"INSERT IGNORE INTO `cineworld`.`film` (`edi`, `title`) VALUES (@edi, @title)",
 						from c in cinemas.cinema
-						from f in c.listing
+						from f in c.films
 						where f.edi > 0 // Theatre Let
 						group f by f.edi into gg
 						select new
@@ -82,7 +82,7 @@ namespace MovieTimes.Service.Repositories.Concrete
 				await base.ExecuteAsync(
 					"INSERT IGNORE INTO `cineworld`.`show` (`cinemaId`, `filmEdi`, `time`) VALUES (@cinemaId, @filmEdi, @time)",
 					from c in cinemas.cinema
-					from f in c.listing
+					from f in c.films
 					where f.edi > 0 // Theatre Let
 					from s in f.shows
 					group (c, f, s) by (c.id, f.edi, s.time) into gg

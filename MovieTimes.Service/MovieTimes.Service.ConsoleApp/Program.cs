@@ -66,25 +66,6 @@ namespace MovieTimes.Service.ConsoleApp
 							return new HttpClientHandler { AllowAutoRedirect = false, };
 						});
 
-					services
-						.AddHttpClient(
-							nameof(Clients.Concrete.CineworldClient),
-							(_, client) =>
-							{
-								var uriSettings = hostBuilderContext.Configuration
-									.GetSection(nameof(Configuration.Uris))
-									.Get<Configuration.Uris>();
-
-								client.Timeout = TimeSpan.FromSeconds(10);
-								client.BaseAddress = new Uri(uriSettings.CineworldBaseUri!, UriKind.Absolute);
-								client.DefaultRequestHeaders.Accept.Clear();
-								client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
-							})
-						.ConfigurePrimaryHttpMessageHandler(() =>
-						{
-							return new HttpClientHandler { AllowAutoRedirect = false, };
-						});
-
 					// config
 					services
 						.Configure<Helpers.MySql.Models.DbSettings>(hostBuilderContext.Configuration.GetSection(nameof(Helpers.MySql.Models.DbSettings)))
@@ -93,7 +74,7 @@ namespace MovieTimes.Service.ConsoleApp
 					// clients
 					services
 						.AddTransient<Clients.IApiClient, Clients.Concrete.ApiClient>()
-						.AddTransient<Clients.ICineworldClient, Clients.Concrete.CineworldClient>();
+						.AddTransient<Helpers.Cineworld.ICineworldClient, Helpers.Cineworld.Concrete.CineworldClient>();
 
 					// repos
 					var dbSettings = hostBuilderContext.Configuration
@@ -107,21 +88,17 @@ namespace MovieTimes.Service.ConsoleApp
 
 					// services
 					services
-						.AddTransient<Services.IFixTitlesService, Services.Concrete.FixTitlesService>()
 						.AddTransient<Repositories.IMovieDetailsRepository, Repositories.Concrete.MovieDetailsRepository>();
 
 					// steps
 					services
-						.AddTransient<Steps.FixTitlesStep>()
 						.AddTransient<Steps.GetLatestLogEntryStep>()
 						.AddTransient<Steps.GetListingsHeadersStep>()
 						.AddTransient<Steps.GetListingsStep>()
 						.AddTransient<Steps.GetQueriesStep>()
-						.AddTransient<Steps.GetTitlesStep>()
 						.AddTransient<Steps.RunQueryStep>()
 						.AddTransient<Steps.SaveCinemasStep>()
-						.AddTransient<Steps.SaveLogEntryStep>()
-						.AddTransient<Steps.SaveTitlesStep>();
+						.AddTransient<Steps.SaveLogEntryStep>();
 
 					services
 						.AddWorkflow()

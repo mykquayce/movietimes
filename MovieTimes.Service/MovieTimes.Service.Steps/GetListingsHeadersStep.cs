@@ -1,4 +1,5 @@
 ﻿using Dawn;
+using System;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -7,19 +8,19 @@ namespace MovieTimes.Service.Steps
 {
 	public class GetListingsHeadersStep : IStepBody
 	{
-		private readonly Clients.ICineworldClient _cineworldClient;
+		private readonly Helpers.Cineworld.ICineworldClient _cineworldClient;
 
 		public GetListingsHeadersStep(
-			Clients.ICineworldClient cineworldClient)
+			Helpers.Cineworld.ICineworldClient cineworldClient)
 		{
 			_cineworldClient = Guard.Argument(() => cineworldClient).NotNull().Value;
 		}
 
-		public Models.HttpHeaders? HttpHeaders { get; set; }
+		public DateTime? LastModified { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
-			HttpHeaders = await _cineworldClient.GetHeadersAsync();
+			LastModified = await _cineworldClient.GetPerformancesLastModifiedDateAsync();
 
 			return ExecutionResult.Next();
 		}

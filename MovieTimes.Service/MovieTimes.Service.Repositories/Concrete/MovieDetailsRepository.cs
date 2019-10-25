@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Helpers.Cineworld.Models;
+using Microsoft.Extensions.Options;
 using MovieTimes.Service.Models;
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
