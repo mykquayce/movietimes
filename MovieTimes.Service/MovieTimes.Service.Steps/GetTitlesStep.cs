@@ -9,7 +9,7 @@ namespace MovieTimes.Service.Steps
 {
 	public class GetTitlesStep : IStepBody
 	{
-		public Models.Generated.cinemas? Cinemas { get; set; }
+		public Helpers.Cineworld.Models.cinemasType? Cinemas { get; set; }
 		public IEnumerable<(int edi, string title)>? EdiTitleTuples { get; set; }
 
 		public Task<ExecutionResult> RunAsync(IStepExecutionContext context)

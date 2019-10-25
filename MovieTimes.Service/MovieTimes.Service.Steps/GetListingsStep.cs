@@ -7,19 +7,19 @@ namespace MovieTimes.Service.Steps
 {
 	public class GetListingsStep : IStepBody
 	{
-		private readonly Clients.ICineworldClient _cineworldClient;
+		private readonly Helpers.Cineworld.ICineworldClient _cineworldClient;
 
 		public GetListingsStep(
-			Clients.ICineworldClient cineworldClient)
+			Helpers.Cineworld.ICineworldClient cineworldClient)
 		{
 			_cineworldClient = Guard.Argument(() => cineworldClient).NotNull().Value;
 		}
 
-		public Models.Generated.cinemas? Cinemas { get; set; }
+		public Helpers.Cineworld.Models.cinemasType? Cinemas { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
-			Cinemas = await _cineworldClient.GetListingsAsync();
+			Cinemas = await _cineworldClient.GetPerformancesAsync();
 
 			return ExecutionResult.Next();
 		}

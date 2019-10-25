@@ -24,7 +24,7 @@ namespace MovieTimes.Service.Workflows
 					)
 					.Do(then =>
 						then.StartWith<Steps.GetListingsHeadersStep>()
-							.Output(data => data.RemoteLastModified, step => step.HttpHeaders!.LastModified)
+							.Output(data => data.RemoteLastModified, step => step.LastModified!)
 					)
 				.Join()
 
