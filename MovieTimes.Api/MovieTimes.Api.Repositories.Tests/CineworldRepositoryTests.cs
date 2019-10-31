@@ -22,19 +22,20 @@ namespace MovieTimes.Api.Repositories.Tests
 		public async Task CineworldRepositoryTests_GetCinemasAsync_ReturnsCinemas(
 			string name, short expectedId, string expectedName)
 		{
+			// Arrange
+			var count = 0;
+
 			// Act
-			var actual = await _repository.GetCinemasAsync(name);
+			await foreach (var actual in _repository.GetCinemasAsync(name))
+			{
+				count++;
 
-			// Assert
-			Assert.NotNull(actual);
-			Assert.NotEmpty(actual);
-			Assert.Single(actual);
+				// Assert
+				Assert.Equal(expectedId, actual.id);
+				Assert.Equal(expectedName, actual.name);
+			}
 
-			var (actualId, actualName) = actual.First();
-
-			// Assert
-			Assert.Equal(expectedId, actualId);
-			Assert.Equal(expectedName, actualName);
+			Assert.Equal(1, count);
 		}
 
 		[Theory]
@@ -47,18 +48,16 @@ namespace MovieTimes.Api.Repositories.Tests
 			int weekCount)
 		{
 			// Arrange
+			var count = 0;
 			var minDate = DateTime.UtcNow.Date;
 			var maxDate = minDate.AddDays(100);
 
 			// Act
-			var shows = await _repository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms, weekCount);
-
-			// Assert
-			Assert.NotNull(shows);
-			Assert.NotEmpty(shows);
-
-			foreach (var (cinemaId, cinemaName, dateTime, title) in shows)
+			await foreach (var (cinemaId, cinemaName, dateTime, title) in _repository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms, weekCount))
 			{
+				count++;
+
+				// Assert
 				Assert.InRange(cinemaId, 1, short.MaxValue);
 				Assert.False(string.IsNullOrWhiteSpace(cinemaName));
 				Assert.Matches(@"^\S.+\S$", cinemaName);
@@ -78,6 +77,8 @@ namespace MovieTimes.Api.Repositories.Tests
 
 				Assert.NotEqual(-1, indices.Max());
 			}
+
+			Assert.InRange(count, 1, int.MaxValue);
 		}
 
 		private static DaysOfWeek Convert(DayOfWeek dayOfWeek) => dayOfWeek.ConvertEnum<DayOfWeek, DaysOfWeek>();

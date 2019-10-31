@@ -2,16 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Dawn.Guard" Version="1.9.0" />
-    <PackageReference Include="Helpers.MySql" Version="1.1.1-preview" />
-    <PackageReference Include="Helpers.Tracing" Version="1.0.8-preview" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0-rc1.19456.10" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.0.0-rc1.19456.10" />
+    <PackageReference Include="Helpers.MySql" Version="1.1.8" />
+    <PackageReference Include="Helpers.Tracing" Version="1.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
