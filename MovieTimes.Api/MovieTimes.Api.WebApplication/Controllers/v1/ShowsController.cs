@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MovieTimes.Api.Repositories;
 using OpenTracing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -52,29 +53,26 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 
 			_logger?.LogInformation($"{nameof(cinemas)}={cinemasString};{nameof(daysOfWeek)}={daysOfWeek:F};{nameof(timesOfDay)}={timesOfDay:F};{nameof(searchTerms)}={searchTermsString}");
 
-			ICollection<short> cinemaIds;
+			var cinemaIds = new List<short>();
 
 			if (cinemas?.Count > 0)
 			{
-				cinemaIds = (from tuple in await _cineworldRepository.GetCinemasAsync(cinemas)
-							 select tuple.id
-							).ToList();
-			}
-			else
-			{
-				cinemaIds = new short[0];
+				await foreach (var (id, _) in _cineworldRepository.GetCinemasAsync(cinemas))
+				{
+					cinemaIds.Add(id);
+				}
 			}
 
-			var shows = await _cineworldRepository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0], weekCount);
+			var shows = new List<(string cinema, DateTime dateTime, string title)>();
+
+			await foreach (var (_, cinema, dateTime, title) in _cineworldRepository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0], weekCount))
+			{
+				shows.Add((cinema, dateTime, title));
+			}
 
 			return Ok(from s in shows
-					  orderby s.cinemaName, s.dateTime, s.title
-					  select new
-					  {
-						  s.cinemaName,
-						  s.dateTime,
-						  s.title,
-					  });
+					  orderby s.cinema
+					  select s);
 		}
 	}
 }

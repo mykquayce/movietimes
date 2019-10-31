@@ -25,7 +25,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 			_logger = logger;
 		}
 
-		public async Task<IEnumerable<(short id, string name)>> GetCinemasAsync(ICollection<string> searchTerms)
+		public async IAsyncEnumerable<(short id, string name)> GetCinemasAsync(ICollection<string> searchTerms)
 		{
 			var searchTermsString = string.Join(", ", searchTerms);
 
@@ -35,35 +35,31 @@ namespace MovieTimes.Api.Repositories.Concrete
 
 			_logger?.LogInformation($"{nameof(searchTerms)}={searchTermsString}");
 
-			var tasks = searchTerms.Select(GetCinemasAsync);
-
-			var cinemases = await Task.WhenAll(tasks);
-
-			return from tuples in cinemases
-				   from tuple in tuples
-				   select tuple;
+			foreach (var searchTerm in searchTerms)
+			{
+				await foreach (var (id, name) in GetCinemasAsync(searchTerm))
+				{
+					yield return (id, name);
+				}
+			}
 		}
 
-		public async Task<IEnumerable<(short id, string name)>> GetCinemasAsync(string? search = default)
+		public IAsyncEnumerable<(short id, string name)> GetCinemasAsync(string? search = default)
 		{
-			using var _ = _tracer?.BuildDefaultSpan()
-				.WithTag(nameof(search), search)
-				.StartActive(finishSpanOnDispose: true);
-
 			_logger?.LogInformation($"{nameof(search)}={search}");
 
 			if (string.IsNullOrWhiteSpace(search))
 			{
-				return await base.QueryAsync<(short id, string name)>(
+				return base.QueryAsync<(short id, string name)>(
 					"SELECT * FROM cineworld.cinema;");
 			}
 
-			return await base.QueryAsync<(short id, string name)>(
+			return base.QueryAsync<(short id, string name)>(
 				"SELECT * FROM cineworld.cinema WHERE name LIKE @search;",
 				new { search = $"%{search}%", });
 		}
 
-		public async Task<IEnumerable<(short cinemaId, string cinemaName, DateTime dateTime, string title)>> GetShowsAsync(
+		public async IAsyncEnumerable<(short cinemaId, string cinemaName, DateTime dateTime, string title)> GetShowsAsync(
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,
 			TimesOfDay timesOfDay,
@@ -116,9 +112,10 @@ namespace MovieTimes.Api.Repositories.Concrete
 				daysOfWeek = daysOfWeekString.Split(','),
 			};
 
-			var results = await base.QueryAsync<(short cinemaId, string cinemaName, DateTime dateTime, string title)>(sql, @params);
-
-			return results;
+			await foreach(var tuple in base.QueryAsync<(short cinemaId, string cinemaName, DateTime dateTime, string title)>(sql, @params))
+			{
+				yield return tuple;
+			}
 		}
 
 		private static string SqlFromTimesOfDay(TimesOfDay timesOfDay)

@@ -31,37 +31,34 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 		[HttpGet]
 		[Route("")]
 		public async Task<IActionResult> Get(
-			[FromQuery(Name = "name")] IReadOnlyCollection<string>? names = default)
+			[FromQuery(Name = "name")] ICollection<string>? searchTerms = default)
 		{
-			var namesString = (names?.Any() ?? false) ? string.Join(", ", names!) : default;
+			var searchTermsString = (searchTerms?.Any() ?? false) ? string.Join(", ", searchTerms!) : default;
 
 			using var scope = _tracer.BuildDefaultSpan()
-				.WithTag(nameof(names), namesString)
+				.WithTag(nameof(searchTerms), searchTermsString)
 				.StartActive(finishSpanOnDispose: true);
 
-			_logger.LogInformation($"{nameof(names)}={namesString}");
+			_logger.LogInformation($"{nameof(searchTerms)}={searchTermsString}");
 
-			if (names == default
-				|| names.All(string.IsNullOrWhiteSpace))
+			if (searchTerms == default) searchTerms = new List<string> { string.Empty, };
+
+			if (searchTerms.Count == 0) searchTerms.Add(string.Empty);
+
+			var cinemas = new List<(short id, string name)>();
+
+			foreach (var searchTerm in from n in searchTerms
+									   where !string.IsNullOrWhiteSpace(n)
+									   select n)
 			{
-				return Ok(from c in await _cineworldRepository.GetCinemasAsync()
-						  select new
-						  {
-							  c.id,
-							  c.name,
-						  });
+				await foreach (var (id, name) in _cineworldRepository.GetCinemasAsync(searchTerm))
+				{
+					cinemas.Add((id, name));
+				}
 			}
 
-			var tasks = from name in names
-						where !string.IsNullOrWhiteSpace(name)
-						select _cineworldRepository.GetCinemasAsync();
-
-			var cinemases = await Task.WhenAll(tasks);
-
-			return Ok(from cc in cinemases
-					  from c in cc
+			return Ok(from c in cinemas
 					  group c by c.id into gg
-					  orderby gg.Key
 					  select new
 					  {
 						  id = gg.Key,
