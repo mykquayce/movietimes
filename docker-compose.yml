@@ -24,8 +24,8 @@ services:
     secrets:
     - source: MySqlCineworldPassword
  
-  cineworldservice:
-    image: eassbhhtgu/movietimes-cineworldservice:latest
+  service:
+    image: eassbhhtgu/movietimes-service:latest
     environment:
     - NETCORE_ENVIRONMENT=Production
     depends_on:
