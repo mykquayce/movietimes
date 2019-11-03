@@ -21,8 +21,9 @@ namespace MovieTimes.Service.WorkerService
 			_logger = logger;
 
 			_workflowHost = workflowHost;
-			_workflowHost.RegisterWorkflow<Workflows.Workflow, Models.PersistenceData>();
 			_workflowHost.OnStepError += WorkflowHost_OnStepError;
+			_workflowHost.RegisterWorkflow<Workflows.Workflow, Models.PersistenceData>();
+			_workflowHost.Start();
 		}
 
 		private void WorkflowHost_OnStepError(WorkflowCore.Models.WorkflowInstance workflow, WorkflowCore.Models.WorkflowStep step, Exception exception)
@@ -40,6 +41,8 @@ namespace MovieTimes.Service.WorkerService
 
 				await Task.Delay(_delay, stoppingToken);
 			}
+
+			await _workflowHost.StopAsync(stoppingToken);
 		}
 	}
 }
