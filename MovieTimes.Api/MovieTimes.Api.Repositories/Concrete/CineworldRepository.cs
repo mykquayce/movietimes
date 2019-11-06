@@ -59,7 +59,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 				new { search = $"%{search}%", });
 		}
 
-		public async IAsyncEnumerable<(short cinemaId, string cinemaName, DateTime dateTime, string title)> GetShowsAsync(
+		public async IAsyncEnumerable<(short cinemaId, string cinemaName, DateTime dateTime, string title, short duration)> GetShowsAsync(
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,
 			TimesOfDay timesOfDay,
@@ -95,7 +95,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 				? "1 = 1"
 				: $"s.time BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL {weekCount:D} WEEK)";
 
-			var sql = $@"SELECT c.id cinemaId, c.name cinemaName, s.time, f.title
+			var sql = $@"SELECT c.id cinemaId, c.name cinemaName, s.time, f.title, f.duration
 					FROM cineworld.cinema c
 						JOIN cineworld.show s ON c.id = s.cinemaId
 						JOIN cineworld.film f ON s.filmEdi = f.edi
@@ -112,7 +112,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 				daysOfWeek = daysOfWeekString.Split(','),
 			};
 
-			await foreach(var tuple in base.QueryAsync<(short cinemaId, string cinemaName, DateTime dateTime, string title)>(sql, @params))
+			await foreach (var tuple in base.QueryAsync<(short cinemaId, string cinemaName, DateTime dateTime, string title, short duration)>(sql, @params))
 			{
 				yield return tuple;
 			}
