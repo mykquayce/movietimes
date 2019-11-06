@@ -63,16 +63,22 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 				}
 			}
 
-			var shows = new List<(string cinema, DateTime dateTime, string title)>();
+			var shows = new List<(string cinema, DateTime dateTime, string title, short duration)>();
 
-			await foreach (var (_, cinema, dateTime, title) in _cineworldRepository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0], weekCount))
+			await foreach (var (_, cinema, dateTime, title, duration) in _cineworldRepository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0], weekCount))
 			{
-				shows.Add((cinema, dateTime, title));
+				shows.Add((cinema, dateTime, title, duration));
 			}
 
 			return Ok(from s in shows
 					  orderby s.cinema
-					  select s);
+					  select new
+					  {
+						  s.cinema,
+						  s.dateTime,
+						  s.title,
+						  s.duration,
+					  });
 		}
 	}
 }

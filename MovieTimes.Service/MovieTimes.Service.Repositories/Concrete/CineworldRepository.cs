@@ -66,15 +66,17 @@ namespace MovieTimes.Service.Repositories.Concrete
 						},
 						transaction: transaction),
 					base.ExecuteAsync(
-						"INSERT IGNORE INTO `cineworld`.`film` (`edi`, `title`) VALUES (@edi, @title)",
+						"INSERT IGNORE INTO `cineworld`.`film` (`edi`, `title`, `duration`) VALUES (@edi, @title, @duration)",
 						from c in cinemas.cinema
 						from f in c.films
 						where f.edi > 0 // Theatre Let
 						group f by f.edi into gg
+						let first = gg.First()
 						select new
 						{
 							edi = gg.Key,
-							gg.First().title,
+							first.title,
+							duration = first.Duration,
 						},
 						transaction: transaction)
 				);
@@ -85,12 +87,12 @@ namespace MovieTimes.Service.Repositories.Concrete
 					from f in c.films
 					where f.edi > 0 // Theatre Let
 					from s in f.shows
-					group (c, f, s) by (c.id, f.edi, s.time) into gg
+					group (c, f, s) by (c.id, f.edi, s.DateTime) into gg
 					select new
 					{
 						cinemaId = gg.Key.id,
 						filmEdi = gg.Key.edi,
-						gg.Key.time,
+						time = gg.Key.DateTime,
 					},
 					transaction: transaction);
 

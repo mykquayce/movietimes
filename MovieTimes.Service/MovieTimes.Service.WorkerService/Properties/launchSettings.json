@@ -1,9 +1,9 @@
 {
   "profiles": {
-    "MovieTimes.Service.ConsoleApp": {
+    "MovieTimes.Service.WorkerService": {
       "commandName": "Project",
       "environmentVariables": {
-        "NETCORE_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development"
       }
     }
   }

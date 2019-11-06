@@ -10,7 +10,7 @@ namespace MovieTimes.Api.Repositories
 
 		IAsyncEnumerable<(short id, string name)> GetCinemasAsync(string? search = default);
 
-		IAsyncEnumerable<(short cinemaId, string cinemaName, DateTime dateTime, string title)> GetShowsAsync(
+		IAsyncEnumerable<(short cinemaId, string cinemaName, DateTime dateTime, string title, short duration)> GetShowsAsync(
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,
 			TimesOfDay timesOfDay,
