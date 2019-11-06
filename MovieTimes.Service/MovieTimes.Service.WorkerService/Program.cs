@@ -15,14 +15,6 @@ namespace MovieTimes.Service.WorkerService
 			var hostBuilder = Host.CreateDefaultBuilder(args);
 
 			hostBuilder
-				.ConfigureAppConfiguration((context, builder) =>
-				{
-					var environmentName = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT") ?? "Production";
-
-					context.HostingEnvironment.EnvironmentName = environmentName;
-				});
-
-			hostBuilder
 				.ConfigureServices((hostContext, services) =>
 				{
 					// http clients
