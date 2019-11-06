@@ -28,7 +28,7 @@ namespace MovieTimes.Service.WorkerService
 
 		private void WorkflowHost_OnStepError(WorkflowCore.Models.WorkflowInstance workflow, WorkflowCore.Models.WorkflowStep step, Exception exception)
 		{
-			throw new NotImplementedException();
+			_logger?.LogError(exception, $"Workflow: {workflow?.Id}, step: {step?.Name} threw {exception?.Message}");
 		}
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
