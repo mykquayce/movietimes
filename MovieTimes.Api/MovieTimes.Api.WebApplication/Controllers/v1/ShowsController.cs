@@ -16,6 +16,8 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 	[ApiController]
 	public class ShowsController : ControllerBase
 	{
+		private static readonly TimeSpan _padding = TimeSpan.FromMinutes(30);
+
 		private readonly ITracer _tracer;
 		private readonly ILogger _logger;
 		private readonly ICineworldRepository _cineworldRepository;
@@ -77,8 +79,8 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 					  {
 						  cinema = s.Cinema.Name,
 						  dateTime = s.DateTime,
+						  end = (s.DateTime + _padding + TimeSpan.FromMinutes(s.Movie.Duration)).TimeOfDay,
 						  movie = s.Movie.Title,
-						  duration = s.Movie.Duration,
 					  });
 		}
 	}
