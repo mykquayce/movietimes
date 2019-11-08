@@ -31,8 +31,8 @@ namespace MovieTimes.Api.Repositories.Tests
 				count++;
 
 				// Assert
-				Assert.Equal(expectedId, actual.id);
-				Assert.Equal(expectedName, actual.name);
+				Assert.Equal(expectedId, actual.Id);
+				Assert.Equal(expectedName, actual.Name);
 			}
 
 			Assert.Equal(1, count);
@@ -53,29 +53,31 @@ namespace MovieTimes.Api.Repositories.Tests
 			var maxDate = minDate.AddDays(100);
 
 			// Act
-			await foreach (var (cinemaId, cinemaName, dateTime, title) in _repository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms, weekCount))
+			await foreach (var show in _repository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms, weekCount))
 			{
 				count++;
 
 				// Assert
-				Assert.InRange(cinemaId, 1, short.MaxValue);
-				Assert.False(string.IsNullOrWhiteSpace(cinemaName));
-				Assert.Matches(@"^\S.+\S$", cinemaName);
-				Assert.InRange(dateTime, minDate, maxDate);
-				Assert.Equal(0, dateTime.Second);
-				Assert.Equal(0, dateTime.Millisecond);
+				Assert.InRange(show.Cinema.Id, 1, short.MaxValue);
+				Assert.False(string.IsNullOrWhiteSpace(show.Cinema.Name));
+				Assert.Matches(@"^\S.+\S$", show.Cinema.Name);
+				Assert.InRange(show.DateTime, minDate, maxDate);
+				Assert.Equal(0, show.DateTime.Second);
+				Assert.Equal(0, show.DateTime.Millisecond);
 
-				Assert.NotEqual(DaysOfWeek.None, daysOfWeek & Convert(dateTime.DayOfWeek));
+				Assert.NotEqual(DaysOfWeek.None, daysOfWeek & Convert(show.DateTime.DayOfWeek));
 
-				Assert.InRange(dateTime.Hour, 6, 18);
+				Assert.InRange(show.DateTime.Hour, 6, 18);
 
-				Assert.False(string.IsNullOrWhiteSpace(title));
-				Assert.Matches(@"^\S.+\S$", title);
+				Assert.False(string.IsNullOrWhiteSpace(show.Movie.Title));
+				Assert.Matches(@"^\S.+\S$", show.Movie.Title);
 
 				var indices = from t in searchTerms
-							  select title.IndexOf(t, StringComparison.InvariantCultureIgnoreCase);
+							  select show.Movie.Title.IndexOf(t, StringComparison.InvariantCultureIgnoreCase);
 
 				Assert.NotEqual(-1, indices.Max());
+
+				Assert.InRange(show.Movie.Duration, 10, short.MaxValue);
 			}
 
 			Assert.InRange(count, 1, int.MaxValue);

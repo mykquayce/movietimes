@@ -2,6 +2,7 @@
 using Helpers.Tracing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MovieTimes.Api.Models;
 using MovieTimes.Api.Repositories;
 using OpenTracing;
 using System;
@@ -57,27 +58,27 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 
 			if (cinemas?.Count > 0)
 			{
-				await foreach (var (id, _) in _cineworldRepository.GetCinemasAsync(cinemas))
+				await foreach (var cinema in _cineworldRepository.GetCinemasAsync(cinemas))
 				{
-					cinemaIds.Add(id);
+					cinemaIds.Add(cinema.Id);
 				}
 			}
 
-			var shows = new List<(string cinema, DateTime dateTime, string title, short duration)>();
+			var shows = new List<Show>();
 
-			await foreach (var (_, cinema, dateTime, title, duration) in _cineworldRepository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0], weekCount))
+			await foreach (var show in _cineworldRepository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0], weekCount))
 			{
-				shows.Add((cinema, dateTime, title, duration));
+				shows.Add(show);
 			}
 
 			return Ok(from s in shows
-					  orderby s.cinema
+					  orderby s.Cinema.Name
 					  select new
 					  {
-						  s.cinema,
-						  s.dateTime,
-						  s.title,
-						  s.duration,
+						  cinema = s.Cinema.Name,
+						  dateTime = s.DateTime,
+						  movie = s.Movie.Title,
+						  duration = s.Movie.Duration,
 					  });
 		}
 	}

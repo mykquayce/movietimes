@@ -1,6 +1,7 @@
 ﻿using Dawn;
 using Helpers.Tracing;
 using Microsoft.Extensions.Logging;
+using MovieTimes.Api.Models;
 using MovieTimes.Api.Models.Enums;
 using OpenTracing;
 using System;
@@ -25,7 +26,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 			_logger = logger;
 		}
 
-		public async IAsyncEnumerable<(short id, string name)> GetCinemasAsync(ICollection<string> searchTerms)
+		public async IAsyncEnumerable<Cinema> GetCinemasAsync(ICollection<string> searchTerms)
 		{
 			var searchTermsString = string.Join(", ", searchTerms);
 
@@ -35,31 +36,35 @@ namespace MovieTimes.Api.Repositories.Concrete
 
 			_logger?.LogInformation($"{nameof(searchTerms)}={searchTermsString}");
 
+			if (searchTerms.Count == 0)
+			{
+				searchTerms.Add(string.Empty);
+			}
+
 			foreach (var searchTerm in searchTerms)
 			{
-				await foreach (var (id, name) in GetCinemasAsync(searchTerm))
+				await foreach (var cinema in GetCinemasAsync(searchTerm))
 				{
-					yield return (id, name);
+					yield return cinema;
 				}
 			}
 		}
 
-		public IAsyncEnumerable<(short id, string name)> GetCinemasAsync(string? search = default)
+		public IAsyncEnumerable<Cinema> GetCinemasAsync(string? search = default)
 		{
 			_logger?.LogInformation($"{nameof(search)}={search}");
 
 			if (string.IsNullOrWhiteSpace(search))
 			{
-				return base.QueryAsync<(short id, string name)>(
-					"SELECT * FROM cineworld.cinema;");
+				return base.QueryAsync<Cinema>("SELECT * FROM cineworld.cinema;");
 			}
 
-			return base.QueryAsync<(short id, string name)>(
+			return base.QueryAsync<Cinema>(
 				"SELECT * FROM cineworld.cinema WHERE name LIKE @search;",
 				new { search = $"%{search}%", });
 		}
 
-		public async IAsyncEnumerable<(short cinemaId, string cinemaName, DateTime dateTime, string title, short duration)> GetShowsAsync(
+		public async IAsyncEnumerable<Show> GetShowsAsync(
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,
 			TimesOfDay timesOfDay,
@@ -112,9 +117,11 @@ namespace MovieTimes.Api.Repositories.Concrete
 				daysOfWeek = daysOfWeekString.Split(','),
 			};
 
-			await foreach (var tuple in base.QueryAsync<(short cinemaId, string cinemaName, DateTime dateTime, string title, short duration)>(sql, @params))
+			var enumerable = base.QueryAsync<(short cinemaId, string cinemaName, DateTime dateTime, string title, short duration)>(sql, @params);
+
+			await foreach ((short cinemaId, string cinemaName, DateTime dateTime, string title, short duration) in enumerable)
 			{
-				yield return tuple;
+				yield return new Show(cinemaId, cinemaName, title, duration, dateTime);
 			}
 		}
 
