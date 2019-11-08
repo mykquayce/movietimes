@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Helpers.HttpClient" Version="1.0.14" />
+    <PackageReference Include="Helpers.HttpClient" Version="1.0.15" />
   </ItemGroup>
 
   <ItemGroup>
