@@ -54,12 +54,7 @@ namespace MovieTimes.Service.WorkerService
 
 					services
 						.AddTransient<Repositories.ICineworldRepository, Repositories.Concrete.CineworldRepository>()
-						.AddTransient<Repositories.IQueriesRepository, Repositories.Concrete.QueriesRepository>()
-						.AddTransient<Repositories.IMovieDetailsRepository, Repositories.Concrete.MovieDetailsRepository>();
-
-					// services
-					services
-						.AddTransient<Repositories.IMovieDetailsRepository, Repositories.Concrete.MovieDetailsRepository>();
+						.AddTransient<Repositories.IQueriesRepository, Repositories.Concrete.QueriesRepository>();
 
 					// steps
 					services
