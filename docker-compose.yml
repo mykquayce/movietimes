@@ -17,12 +17,12 @@ services:
     - MYSQL_RANDOM_ROOT_PASSWORD=yes
     - MYSQL_DATABASE=cineworld
     - MYSQL_USER=movietimes
-    - MYSQL_PASSWORD_FILE=/run/secrets/MySqlCineworldPassword
+    - MYSQL_PASSWORD_FILE=/run/secrets/Password
     volumes:
     - mariadb-volume:/var/lib/mysql:rw
     - ./MovieTimes.Db:/docker-entrypoint-initdb.d
     secrets:
-    - source: MySqlCineworldPassword
+    - source: Password
  
   service:
     image: eassbhhtgu/movietimes-service:latest
@@ -32,7 +32,7 @@ services:
     - jaeger
     - mariadb
     secrets:
-    - source: MySqlCineworldPassword
+    - source: Password
  
   api:
     image: eassbhhtgu/movietimes-api:latest
@@ -44,10 +44,10 @@ services:
     - jaeger
     - mariadb
     secrets:
-    - source: MySqlCineworldPassword
+    - source: Password
 
 secrets:
-  MySqlCineworldPassword:
+  Password:
     external: true
     name: MySqlCineworldPassword
 

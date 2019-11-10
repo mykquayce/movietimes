@@ -15,6 +15,12 @@ namespace MovieTimes.Service.WorkerService
 			var hostBuilder = Host.CreateDefaultBuilder(args);
 
 			hostBuilder
+				.ConfigureAppConfiguration((context, builder) =>
+				{
+					builder.AddDockerSecret("DbSettings", "Password", optional: context.HostingEnvironment.IsDevelopment());
+				});
+
+			hostBuilder
 				.ConfigureServices((hostContext, services) =>
 				{
 					// http clients

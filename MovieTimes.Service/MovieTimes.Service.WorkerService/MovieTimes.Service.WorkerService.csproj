@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Helpers.DockerSecrets" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0" />
     <PackageReference Include="OpenTracing" Version="0.12.1" />
   </ItemGroup>
