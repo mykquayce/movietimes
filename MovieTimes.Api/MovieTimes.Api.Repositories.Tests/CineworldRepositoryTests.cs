@@ -44,8 +44,8 @@ namespace MovieTimes.Api.Repositories.Tests
 				count++;
 
 				// Assert
-				Assert.Equal(expectedId, actual.Id);
-				Assert.Equal(expectedName, actual.Name);
+				Assert.Equal(expectedId, actual.id);
+				Assert.Equal(expectedName, actual.name);
 			}
 
 			Assert.Equal(1, count);
@@ -62,35 +62,34 @@ namespace MovieTimes.Api.Repositories.Tests
 		{
 			// Arrange
 			var count = 0;
-			var minDate = DateTime.UtcNow.Date;
+			var minDate = DateTime.UtcNow.Date.AddDays(-1);
 			var maxDate = minDate.AddDays(100);
 
 			// Act
-			await foreach (var show in _repository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms, weekCount))
+			await foreach (var details in _repository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms, weekCount))
 			{
 				count++;
 
 				// Assert
-				Assert.InRange(show.Cinema.Id, 1, short.MaxValue);
-				Assert.False(string.IsNullOrWhiteSpace(show.Cinema.Name));
-				Assert.Matches(@"^\S.+\S$", show.Cinema.Name);
-				Assert.InRange(show.DateTime, minDate, maxDate);
-				Assert.Equal(0, show.DateTime.Second);
-				Assert.Equal(0, show.DateTime.Millisecond);
+				Assert.False(string.IsNullOrWhiteSpace(details.Cinema));
+				Assert.Matches(@"^\S.+\S$", details.Cinema);
+				Assert.InRange(details.DateTime, minDate, maxDate);
+				Assert.Equal(0, details.DateTime.Second);
+				Assert.Equal(0, details.DateTime.Millisecond);
 
-				Assert.NotEqual(DaysOfWeek.None, daysOfWeek & Convert(show.DateTime.DayOfWeek));
+				Assert.NotEqual(DaysOfWeek.None, daysOfWeek & Convert(details.DateTime.DayOfWeek));
 
-				Assert.InRange(show.DateTime.Hour, 6, 18);
+				Assert.InRange(details.DateTime.Hour, 6, 18);
 
-				Assert.False(string.IsNullOrWhiteSpace(show.Movie.Title));
-				Assert.Matches(@"^\S.+\S$", show.Movie.Title);
+				Assert.False(string.IsNullOrWhiteSpace(details.Movie));
+				Assert.Matches(@"^\S.+\S$", details.Movie);
 
 				var indices = from t in searchTerms
-							  select show.Movie.Title.IndexOf(t, StringComparison.InvariantCultureIgnoreCase);
+							  select details.Movie!.IndexOf(t, StringComparison.InvariantCultureIgnoreCase);
 
 				Assert.NotEqual(-1, indices.Max());
 
-				Assert.InRange(show.Movie.Duration, 10, short.MaxValue);
+				Assert.InRange(details.End, details.DateTime.TimeOfDay, details.DateTime.AddHours(5).TimeOfDay);
 			}
 
 			Assert.InRange(count, 1, int.MaxValue);

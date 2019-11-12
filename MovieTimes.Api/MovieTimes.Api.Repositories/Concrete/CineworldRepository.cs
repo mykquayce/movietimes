@@ -1,14 +1,12 @@
 ﻿using Dawn;
 using Helpers.Tracing;
 using Microsoft.Extensions.Logging;
-using MovieTimes.Api.Models;
 using Microsoft.Extensions.Options;
 using MovieTimes.Api.Models.Enums;
 using OpenTracing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace MovieTimes.Api.Repositories.Concrete
 {
@@ -27,7 +25,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 			_logger = logger;
 		}
 
-		public async IAsyncEnumerable<Cinema> GetCinemasAsync(ICollection<string> searchTerms)
+		public async IAsyncEnumerable<Helpers.Cineworld.Models.cinemaType> GetCinemasAsync(ICollection<string> searchTerms)
 		{
 			var searchTermsString = string.Join(", ", searchTerms);
 
@@ -51,21 +49,21 @@ namespace MovieTimes.Api.Repositories.Concrete
 			}
 		}
 
-		public IAsyncEnumerable<Cinema> GetCinemasAsync(string? search = default)
+		public IAsyncEnumerable<Helpers.Cineworld.Models.cinemaType> GetCinemasAsync(string? search = default)
 		{
 			_logger?.LogInformation($"{nameof(search)}={search}");
 
 			if (string.IsNullOrWhiteSpace(search))
 			{
-				return base.QueryAsync<Cinema>("SELECT * FROM cineworld.cinema;");
+				return base.QueryAsync<Helpers.Cineworld.Models.cinemaType>("SELECT * FROM cineworld.cinema;");
 			}
 
-			return base.QueryAsync<Cinema>(
+			return base.QueryAsync<Helpers.Cineworld.Models.cinemaType>(
 				"SELECT * FROM cineworld.cinema WHERE name LIKE @search;",
 				new { search = $"%{search}%", });
 		}
 
-		public async IAsyncEnumerable<Show> GetShowsAsync(
+		public async IAsyncEnumerable<Helpers.Cineworld.Models.CinemaMovieShow> GetShowsAsync(
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,
 			TimesOfDay timesOfDay,
@@ -101,7 +99,7 @@ namespace MovieTimes.Api.Repositories.Concrete
 				? "1 = 1"
 				: $"s.time BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL {weekCount:D} WEEK)";
 
-			var sql = $@"SELECT c.id cinemaId, c.name cinemaName, s.time, f.title, f.duration
+			var sql = $@"SELECT c.name cinemaName, s.time, f.title, f.duration
 					FROM cineworld.cinema c
 						JOIN cineworld.show s ON c.id = s.cinemaId
 						JOIN cineworld.film f ON s.filmEdi = f.edi
@@ -118,11 +116,17 @@ namespace MovieTimes.Api.Repositories.Concrete
 				daysOfWeek = daysOfWeekString.Split(','),
 			};
 
-			var enumerable = base.QueryAsync<(short cinemaId, string cinemaName, DateTime dateTime, string title, short duration)>(sql, @params);
+			var enumerable = base.QueryAsync<(string cinemaName, DateTime dateTime, string title, short duration)>(sql, @params);
 
-			await foreach ((short cinemaId, string cinemaName, DateTime dateTime, string title, short duration) in enumerable)
+			await foreach ((string cinemaName, DateTime dateTime, string title, short duration) in enumerable)
 			{
-				yield return new Show(cinemaId, cinemaName, title, duration, dateTime);
+				yield return new Helpers.Cineworld.Models.CinemaMovieShow
+				{
+					Cinema = cinemaName,
+					DateTime = dateTime,
+					Movie = title,
+					End = dateTime.TimeOfDay + TimeSpan.FromMinutes(duration) + TimeSpan.FromMinutes(30),
+				};
 			}
 		}
 

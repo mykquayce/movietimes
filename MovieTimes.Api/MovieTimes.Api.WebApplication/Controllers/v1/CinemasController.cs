@@ -45,7 +45,7 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 
 			if (searchTerms.Count == 0) searchTerms.Add(string.Empty);
 
-			var cinemas = new List<Models.Cinema>();
+			var cinemas = new List<Helpers.Cineworld.Models.cinemaType>();
 
 			foreach (var searchTerm in from n in searchTerms
 									   where !string.IsNullOrWhiteSpace(n)
@@ -58,11 +58,11 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 			}
 
 			return Ok(from c in cinemas
-					  group c by c.Id into gg
+					  group c by c.id into gg
 					  select new
 					  {
 						  id = gg.Key,
-						  name = gg.First().Name,
+						  gg.First().name,
 					  });
 		}
 	}

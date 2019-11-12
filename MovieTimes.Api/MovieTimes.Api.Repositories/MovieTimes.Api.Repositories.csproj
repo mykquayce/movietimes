@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dawn.Guard" Version="1.10.0" />
-    <PackageReference Include="Helpers.Cineworld.Models" Version="1.0.2" />
+    <PackageReference Include="Helpers.Cineworld.Models" Version="1.0.3" />
     <PackageReference Include="Helpers.MySql" Version="1.1.9" />
     <PackageReference Include="Helpers.Tracing" Version="1.0.13" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0" />
