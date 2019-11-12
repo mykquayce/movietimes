@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+using Moq;
 using MovieTimes.Api.Models.Enums;
 using MovieTimes.Api.Repositories.Concrete;
 using System;
@@ -14,7 +16,18 @@ namespace MovieTimes.Api.Repositories.Tests
 
 		public CineworldRepositoryTests()
 		{
-			_repository = new CineworldRepository(tracer: default, logger: default, "localhost", port: 3_306, userId: "movietimes", password: "xiebeiyoothohYaidieroh8ahchohphi", database: "cineworld");
+			var dbSettings = new Helpers.MySql.Models.DbSettings
+			{
+				Server = "localhost",
+				Port = 3_306,
+				UserId = "movietimes",
+				Password = "xiebeiyoothohYaidieroh8ahchohphi",
+				Database = "cineworld",
+			};
+
+			var options = Mock.Of<IOptions<Helpers.MySql.Models.DbSettings>>(o => o.Value == dbSettings);
+
+			_repository = new CineworldRepository(tracer: default, logger: default, options);
 		}
 
 		[Theory]

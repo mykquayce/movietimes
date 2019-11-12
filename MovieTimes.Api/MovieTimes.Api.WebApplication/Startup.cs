@@ -23,7 +23,7 @@ namespace MovieTimes.Api.WebApplication
 			var isDevelopment = env.IsDevelopment();
 
 			_configuration = configuration
-				.AddDockerSecret("MySqlCineworldPassword", optional: isDevelopment, reloadOnChange: true);
+				.AddDockerSecret("DbSettings", "Password", optional: isDevelopment, reloadOnChange: true);
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
@@ -47,8 +47,7 @@ namespace MovieTimes.Api.WebApplication
 				.AddNewtonsoftJson();
 
 			services
-				.Configure<Configuration.DbSettings>(_configuration.GetSection(nameof(Configuration.DbSettings)))
-				.Configure<Configuration.DockerSecrets>(_configuration.GetSection(nameof(Configuration.DockerSecrets)))
+				.Configure<Helpers.MySql.Models.DbSettings>(_configuration.GetSection(nameof(Helpers.MySql.Models.DbSettings)))
 				.Configure<Configuration.JaegerSettings>(_configuration.GetSection(nameof(Configuration.JaegerSettings)));
 
 			var jaegerSettings = _configuration.GetSection(nameof(Configuration.JaegerSettings)).Get<Configuration.JaegerSettings>();
@@ -57,23 +56,7 @@ namespace MovieTimes.Api.WebApplication
 				.AddJaegerTracing(_applicationName, jaegerSettings.Host, jaegerSettings.Port);
 
 			services
-				.AddTransient<Repositories.ICineworldRepository>(serviceProvider =>
-				{
-					var dockerSecrets = _configuration
-						.GetSection(nameof(Configuration.DockerSecrets))
-						.Get<Configuration.DockerSecrets>();
-
-					var dbSettings = _configuration
-						.GetSection(nameof(Configuration.DbSettings))
-						.Get<Configuration.DbSettings>();
-
-					var password = dockerSecrets?.MySqlCineworldPassword ?? dbSettings.Password;
-
-					var logger = serviceProvider.GetRequiredService<ILogger<Repositories.Concrete.CineworldRepository>>();
-					var tracer = serviceProvider.GetRequiredService<OpenTracing.ITracer>();
-
-					return new Repositories.Concrete.CineworldRepository(tracer, logger, dbSettings!.Server!, dbSettings.Port, dbSettings!.UserId!, password!, dbSettings!.Database!);
-				});
+				.AddTransient<Repositories.ICineworldRepository, Repositories.Concrete.CineworldRepository>();
 
 			services
 				.AddLogging(builder =>

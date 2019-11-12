@@ -2,6 +2,7 @@
 using Helpers.Tracing;
 using Microsoft.Extensions.Logging;
 using MovieTimes.Api.Models;
+using Microsoft.Extensions.Options;
 using MovieTimes.Api.Models.Enums;
 using OpenTracing;
 using System;
@@ -19,8 +20,8 @@ namespace MovieTimes.Api.Repositories.Concrete
 		public CineworldRepository(
 			ITracer? tracer,
 			ILogger<CineworldRepository>? logger,
-			string server, int port, string userId, string password, string? database = default)
-			: base(server, port, userId, password, database)
+			IOptions<Helpers.MySql.Models.DbSettings> options)
+			: base(options)
 		{
 			_tracer = tracer;
 			_logger = logger;

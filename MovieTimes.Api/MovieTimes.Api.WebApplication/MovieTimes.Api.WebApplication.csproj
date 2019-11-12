@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dawn.Guard" Version="1.10.0" />
-    <PackageReference Include="Helpers.DockerSecrets" Version="1.0.9" />
+    <PackageReference Include="Helpers.DockerSecrets" Version="1.1.0" />
     <PackageReference Include="Helpers.Jaeger" Version="1.0.13" />
     <PackageReference Include="Helpers.Tracing" Version="1.0.13" />
     <PackageReference Include="Helpers.Tracing.Middleware" Version="1.0.7" />
