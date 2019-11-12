@@ -54,10 +54,6 @@ namespace MovieTimes.Service.WorkerService
 						.AddTransient<Helpers.Cineworld.ICineworldClient, Helpers.Cineworld.Concrete.CineworldClient>();
 
 					// repos
-					var dbSettings = hostContext.Configuration
-						.GetSection(nameof(Helpers.MySql.Models.DbSettings))
-						.Get<Helpers.MySql.Models.DbSettings>();
-
 					services
 						.AddTransient<Repositories.ICineworldRepository, Repositories.Concrete.CineworldRepository>()
 						.AddTransient<Repositories.IQueriesRepository, Repositories.Concrete.QueriesRepository>();
