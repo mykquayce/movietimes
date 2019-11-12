@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace MovieTimes.Service.Clients
 {
-	public interface IApiClient
+	public interface IApiClient : IDisposable
 	{
-		Task<T> RunQueryAsync<T>(Uri relativeUri);
+		Task<string> RunQueryAsync(Uri relativeUri);
 	}
 }

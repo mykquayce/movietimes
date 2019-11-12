@@ -66,7 +66,8 @@ namespace MovieTimes.Service.WorkerService
 						.AddTransient<Steps.GetQueriesStep>()
 						.AddTransient<Steps.RunQueryStep>()
 						.AddTransient<Steps.SaveCinemasStep>()
-						.AddTransient<Steps.SaveLogEntryStep>();
+						.AddTransient<Steps.SaveLogEntryStep>()
+						.AddTransient<Steps.SaveQueryResultStep>();
 
 					services
 						.AddWorkflow()

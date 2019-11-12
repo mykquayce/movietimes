@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dawn.Guard" Version="1.10.0" />
-    <PackageReference Include="Helpers.Cineworld" Version="1.0.5" />
+    <PackageReference Include="Helpers.Cineworld" Version="1.0.7" />
     <PackageReference Include="WorkflowCore" Version="2.1.2" />
   </ItemGroup>
 

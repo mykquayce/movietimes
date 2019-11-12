@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
@@ -50,7 +51,11 @@ namespace MovieTimes.Service.Workflows
 				.ForEach(data => data.Queries)
 					.Do(each => each
 						.StartWith<Steps.RunQueryStep>()
-							.Input(step => step.RelativeUri, (_, context) => context.Item as string)
+							.Input(step => step.KeyValuePair, (_, context) => context.Item as KeyValuePair<int, string>?)
+							.Output(data => data.Json, step => step.Json)
+						.Then<Steps.SaveQueryResultStep>()
+							.Input(step => step.KeyValuePair, (_, context) => context.Item as KeyValuePair<int, string>?)
+							.Input(step => step.Json, data => data.Json)
 					)
 
 				/*.Then<Steps.GetTitlesStep>()

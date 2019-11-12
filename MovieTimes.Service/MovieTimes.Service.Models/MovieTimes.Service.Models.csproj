@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Helpers.Cineworld.Models" Version="1.0.2" />
+    <PackageReference Include="Helpers.Cineworld.Models" Version="1.0.3" />
   </ItemGroup>
 
 </Project>

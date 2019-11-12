@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenTracing;
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -12,11 +13,13 @@ namespace MovieTimes.Service.Clients.Concrete
 			: base(httpClientFactory, logger, tracer)
 		{ }
 
-		public async Task<T> RunQueryAsync<T>(Uri relativeUri)
+		public async Task<string> RunQueryAsync(Uri relativeUri)
 		{
-			var (_, value, _) = await base.SendAsync<T>(HttpMethod.Get, relativeUri);
+			var (_, stream, _) = await base.SendAsync(HttpMethod.Get, relativeUri);
 
-			return value;
+			using var reader = new StreamReader(stream);
+
+			return await reader.ReadToEndAsync();
 		}
 	}
 }

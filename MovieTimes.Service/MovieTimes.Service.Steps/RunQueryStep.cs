@@ -1,6 +1,6 @@
 ﻿using Dawn;
-using Helpers.Cineworld.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -16,16 +16,17 @@ namespace MovieTimes.Service.Steps
 			_apiClient = Guard.Argument(() => apiClient).NotNull().Value;
 		}
 
-		public cinemasType? Cinemas { get; set; }
-		public string? RelativeUri { get; set; }
+		public string? Json { get; set; }
+		public KeyValuePair<int, string>? KeyValuePair { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
-			Guard.Argument(() => RelativeUri!).NotNull().NotEmpty().NotWhiteSpace();
+			Guard.Argument(() => KeyValuePair).NotNull();
+			Guard.Argument(() => KeyValuePair!.Value.Value).NotNull().NotEmpty().NotWhiteSpace();
 
-			var relativeUri = new Uri(RelativeUri!, UriKind.Relative);
+			var relativeUri = new Uri(KeyValuePair!.Value.Value, UriKind.Relative);
 
-			Cinemas = await _apiClient.RunQueryAsync<cinemasType>(relativeUri);
+			Json = await _apiClient.RunQueryAsync(relativeUri);
 
 			return ExecutionResult.Next();
 		}

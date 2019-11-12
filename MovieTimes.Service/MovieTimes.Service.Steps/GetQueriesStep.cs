@@ -15,13 +15,13 @@ namespace MovieTimes.Service.Steps
 			_queriesRepository = Guard.Argument(() => queriesRepository).NotNull().Value;
 		}
 
-		public IList<string> Queries { get; set; } = new List<string>();
+		public IDictionary<int, string> Queries { get; } = new Dictionary<int, string>();
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
-			await foreach (var (_, query) in _queriesRepository.GetQueriesAsync())
+			await foreach (var (id, query) in _queriesRepository.GetQueriesAsync())
 			{
-				Queries.Add(query);
+				Queries.Add(id, query);
 			}
 
 			return ExecutionResult.Next();

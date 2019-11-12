@@ -44,5 +44,23 @@ namespace MovieTimes.Service.Repositories.Tests
 			Assert.NotNull(queries[2]);
 			Assert.NotEmpty(queries[2]);
 		}
+
+		[Theory]
+		[InlineData(1, "{}")]
+		public async Task QueriesRepositoryTests_SaveQueryResult(int queryId, string json)
+		{
+			try
+			{
+				// Act
+				await _repository.SaveQueryResult(queryId, json);
+			}
+#pragma warning disable CA1031 // Do not catch general exception types
+			catch
+#pragma warning restore CA1031 // Do not catch general exception types
+			{
+				// Assert
+				Assert.True(false);
+			}
+		}
 	}
 }
