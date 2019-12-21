@@ -1,5 +1,4 @@
 ﻿using Dawn;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
@@ -7,17 +6,18 @@ using WorkflowCore.Models;
 
 namespace MovieTimes.Service.Steps
 {
-	public class RunQueryStep : IStepBody
+	public class GetLastTwoResultsStep : IStepBody
 	{
-		private readonly Clients.IApiClient _apiClient;
+		private readonly Repositories.IQueriesRepository _queriesRepository;
 
-		public RunQueryStep(Clients.IApiClient apiClient)
+		public GetLastTwoResultsStep(
+			Repositories.IQueriesRepository queriesRepository)
 		{
-			_apiClient = Guard.Argument(() => apiClient).NotNull().Value;
+			_queriesRepository = Guard.Argument(() => queriesRepository).NotNull().Value;
 		}
 
-		public string? Json { get; set; }
 		public KeyValuePair<short, string>? KeyValuePair { get; set; }
+		public ICollection<string> Results { get; } = new List<string>();
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
@@ -25,9 +25,10 @@ namespace MovieTimes.Service.Steps
 			Guard.Argument(() => KeyValuePair!.Value.Key).Positive();
 			Guard.Argument(() => KeyValuePair!.Value.Value).NotNull().NotEmpty().NotWhiteSpace();
 
-			var relativeUri = new Uri(KeyValuePair!.Value.Value, UriKind.Relative);
-
-			Json = await _apiClient.RunQueryAsync(relativeUri);
+			await foreach (var result in _queriesRepository.GetLastTwoResultsAsync(KeyValuePair!.Value.Key))
+			{
+				Results.Add(result);
+			}
 
 			return ExecutionResult.Next();
 		}

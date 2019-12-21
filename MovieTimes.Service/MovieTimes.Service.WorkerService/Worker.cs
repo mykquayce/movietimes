@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MovieTimes.Service.Models.Helpers;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
@@ -28,7 +30,11 @@ namespace MovieTimes.Service.WorkerService
 
 		private void WorkflowHost_OnStepError(WorkflowCore.Models.WorkflowInstance workflow, WorkflowCore.Models.WorkflowStep step, Exception exception)
 		{
-			_logger?.LogError(exception, $"Workflow: {workflow?.Id}, step: {step?.Name} threw {exception?.Message}");
+			var message = exception.Message();
+			var data = string.Join(';', from kvp in exception.Data()
+										select $"{kvp.key}={kvp.value}");
+
+			_logger?.LogError(exception, $"Workflow: {workflow?.Id}, step: {step?.Name}, threw {message}, {data}");
 		}
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)

@@ -11,10 +11,15 @@ namespace MovieTimes.Service.Repositories.Concrete
 			: base(options.Value)
 		{ }
 
-		public IAsyncEnumerable<(int id, string query)> GetQueriesAsync()
-			=> base.QueryAsync<(int, string)>("SELECT * FROM queries.saved;");
+		public IAsyncEnumerable<string> GetLastTwoResultsAsync(short queryId)
+			=> base.QueryAsync<string>(
+				"SELECT `json` FROM `queries`.`result` WHERE `queryId` = @queryId ORDER BY `datetime` DESC LIMIT 2;",
+				new { queryId, });
 
-		public Task SaveQueryResult(int id, string json)
+		public IAsyncEnumerable<(short id, string query)> GetQueriesAsync()
+			=> base.QueryAsync<(short, string)>("SELECT `id`, `query` FROM `queries`.`saved`;");
+
+		public Task SaveQueryResult(short id, string json)
 			=> base.ExecuteAsync(
 				@"INSERT IGNORE INTO `queries`.`result` (`datetime`, `queryId`, `json`) VALUES (@datetime, @queryId, @json);",
 				new { datetime = DateTime.UtcNow, queryId = id, json, });

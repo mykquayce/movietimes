@@ -15,7 +15,7 @@ namespace MovieTimes.Service.Steps
 			_queriesRepository = Guard.Argument(() => queriesRepository).NotNull().Value;
 		}
 
-		public IDictionary<int, string> Queries { get; } = new Dictionary<int, string>();
+		public IDictionary<short, string> Queries { get; } = new Dictionary<short, string>();
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{

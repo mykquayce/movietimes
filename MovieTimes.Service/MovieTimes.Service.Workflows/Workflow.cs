@@ -51,23 +51,17 @@ namespace MovieTimes.Service.Workflows
 				.ForEach(data => data.Queries)
 					.Do(each => each
 						.StartWith<Steps.RunQueryStep>()
-							.Input(step => step.KeyValuePair, (_, context) => context.Item as KeyValuePair<int, string>?)
+							.Input(step => step.KeyValuePair, (_, context) => context.Item as KeyValuePair<short, string>?)
 							.Output(data => data.Json, step => step.Json)
 						.Then<Steps.SaveQueryResultStep>()
-							.Input(step => step.KeyValuePair, (_, context) => context.Item as KeyValuePair<int, string>?)
+							.Input(step => step.KeyValuePair, (_, context) => context.Item as KeyValuePair<short, string>?)
 							.Input(step => step.Json, data => data.Json)
+						// get the last two results
+						.Then<Steps.GetLastTwoResultsStep>()
+							.Input(step => step.KeyValuePair, (_, context) => context.Item as KeyValuePair<short, string>?)
+							.Output(data => data.Results, step => step.Results)
+						.If(data => data.Results!.Count == 1)
 					)
-
-				/*.Then<Steps.GetTitlesStep>()
-					.Input(step => step.Cinemas, data => data.Cinemas)
-					.Output(data => data.EdiTitleTuples, step => step.EdiTitleTuples)
-
-				.Then<Steps.FixTitlesStep>()
-					.Input(step => step.EdiTitleTuples, data => data.EdiTitleTuples)
-					.Output(data => data.EdiTitleFormatTuples, step => step.EdiTitleFormatTuples)
-
-				.Then<Steps.SaveTitlesStep>()
-					.Input(step => step.EdiTitleFormatTuples, data => data.EdiTitleFormatTuples)*/
 
 				.EndWorkflow();
 		}

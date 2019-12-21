@@ -15,13 +15,14 @@ namespace MovieTimes.Service.Steps
 			_queriesRepository = Guard.Argument(() => queriesRepository).NotNull().Value;
 		}
 
-		public KeyValuePair<int, string>? KeyValuePair { get; set; }
+		public KeyValuePair<short, string>? KeyValuePair { get; set; }
 		public string? Json { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
 			Guard.Argument(() => KeyValuePair).NotNull();
 			Guard.Argument(() => KeyValuePair!.Value.Key).Positive();
+			Guard.Argument(() => KeyValuePair!.Value.Value).NotNull().NotEmpty().NotWhiteSpace();
 			Guard.Argument(() => Json).Require(s => s != default);
 			Guard.Argument(() => Json!).NotNull().NotEmpty().NotWhiteSpace();
 

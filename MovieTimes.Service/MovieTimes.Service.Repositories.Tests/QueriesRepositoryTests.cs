@@ -47,7 +47,7 @@ namespace MovieTimes.Service.Repositories.Tests
 
 		[Theory]
 		[InlineData(1, "{}")]
-		public async Task QueriesRepositoryTests_SaveQueryResult(int queryId, string json)
+		public async Task QueriesRepositoryTests_SaveQueryResult(short queryId, string json)
 		{
 			try
 			{
@@ -61,6 +61,22 @@ namespace MovieTimes.Service.Repositories.Tests
 				// Assert
 				Assert.True(false);
 			}
+		}
+
+		[Theory]
+		[InlineData(1)]
+		public async Task QueriesRepositoryTests_GetLastTwoResultsAsync(short queryId)
+		{
+			var actual = new List<string>();
+
+			await foreach (var result in _repository.GetLastTwoResultsAsync(queryId))
+			{
+				actual.Add(result);
+			}
+
+			Assert.NotNull(actual);
+			Assert.NotEmpty(actual);
+			Assert.InRange(actual.Count, 1, 2);
 		}
 	}
 }
