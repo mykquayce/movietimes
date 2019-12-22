@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MovieTimes.Service.Models.Helpers
+namespace MovieTimes.Service.Models
 {
 	public static class ExtensionMethods
 	{

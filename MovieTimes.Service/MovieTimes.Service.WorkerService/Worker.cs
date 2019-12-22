@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MovieTimes.Service.Models.Helpers;
+using MovieTimes.Service.Models;
 using System;
 using System.Linq;
 using System.Threading;
