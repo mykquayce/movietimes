@@ -58,6 +58,10 @@ namespace MovieTimes.Service.WorkerService
 						.AddTransient<Repositories.ICineworldRepository, Repositories.Concrete.CineworldRepository>()
 						.AddTransient<Repositories.IQueriesRepository, Repositories.Concrete.QueriesRepository>();
 
+					// services
+					services
+						.AddTransient<Services.IQueriesService, Services.Concrete.QueriesService>();
+
 					// steps
 					services
 						.AddTransient<Steps.GetLatestLogEntryStep>()

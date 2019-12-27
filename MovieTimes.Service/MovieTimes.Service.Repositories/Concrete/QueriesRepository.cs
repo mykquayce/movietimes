@@ -16,7 +16,7 @@ namespace MovieTimes.Service.Repositories.Concrete
 				"SELECT `json` FROM `queries`.`result` WHERE `queryId` = @queryId ORDER BY `datetime` DESC LIMIT 2;",
 				new { queryId, });
 
-		public IAsyncEnumerable<(short id, string query)> GetQueriesAsync()
+		public IAsyncEnumerable<(short, string)> GetQueriesAsync()
 			=> base.QueryAsync<(short, string)>("SELECT `id`, `query` FROM `queries`.`saved`;");
 
 		public Task SaveQueryResult(short id, string json)

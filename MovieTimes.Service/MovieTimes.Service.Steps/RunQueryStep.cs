@@ -9,25 +9,29 @@ namespace MovieTimes.Service.Steps
 {
 	public class RunQueryStep : IStepBody
 	{
-		private readonly Clients.IApiClient _apiClient;
+		private readonly Repositories.ICineworldRepository _cineworldRepository;
 
-		public RunQueryStep(Clients.IApiClient apiClient)
+		public RunQueryStep(Repositories.ICineworldRepository cineworldRepository)
 		{
-			_apiClient = Guard.Argument(() => apiClient).NotNull().Value;
+			_cineworldRepository = Guard.Argument(() => cineworldRepository).NotNull().Value;
 		}
 
-		public string? Json { get; set; }
-		public KeyValuePair<short, string>? KeyValuePair { get; set; }
+		public KeyValuePair<short, Helpers.Cineworld.Models.Query>? KeyValuePair { get; set; }
+		public ICollection<Helpers.Cineworld.Models.cinemaType> Cinemas { get; } = new List<Helpers.Cineworld.Models.cinemaType>();
+
+		public short QueryId => KeyValuePair!.Value.Key;
+		public Helpers.Cineworld.Models.Query Query => KeyValuePair!.Value.Value;
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
 			Guard.Argument(() => KeyValuePair).NotNull();
-			Guard.Argument(() => KeyValuePair!.Value.Key).Positive();
-			Guard.Argument(() => KeyValuePair!.Value.Value).NotNull().NotEmpty().NotWhiteSpace();
+			Guard.Argument(() => QueryId).Positive();
+			Guard.Argument(() => Query).NotNull();
 
-			var relativeUri = new Uri(KeyValuePair!.Value.Value, UriKind.Relative);
-
-			Json = await _apiClient.RunQueryAsync(relativeUri);
+			await foreach(var cinema in _cineworldRepository.RunQueryAsync(Query))
+			{
+				Cinemas.Add(cinema);
+			}
 
 			return ExecutionResult.Next();
 		}

@@ -1,8 +1,10 @@
 ﻿using Helpers.Cineworld.Models;
+using Helpers.Cineworld.Models.Enums;
 using Microsoft.Extensions.Options;
 using MovieTimes.Service.Models;
 using MySql.Data.MySqlClient;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -48,6 +50,60 @@ namespace MovieTimes.Service.Repositories.Concrete
 
 		public Task PurgeOldShowsAsync(DateTime? max = null) =>
 			base.ExecuteAsync("DELETE FROM `cineworld`.`show` WHERE `time` <= @max;", new { max = max ?? DateTime.UtcNow, });
+
+		public async IAsyncEnumerable<cinemaType> RunQueryAsync(Query query)
+		{
+			var sql = @"select
+					c.id cinemaId,
+					dayofyear(s.time) dayofyear,
+					dayname(s.time) dayofweek,
+					case
+						when time(s.time) >= '18:00:00' then 'Evening'
+						when time(s.time) >= '12:00:00' then 'Afternoon'
+						when time(s.time) >= '06:00:00' then 'Morning'
+						else 'Night'
+					end timeofday,
+					f.title,
+					f.duration
+				from `cineworld`.`show` s
+					join `cineworld`.`cinema` c on s.cinemaId = c.id
+					join `cineworld`.`film` f on s.filmEdi = f.edi";
+
+			if (query.CinemaIds.Count > 0)
+			{
+				sql += " where c.id in (@CinemaIds)";
+			}
+
+			sql += " order by c.id, f.title;";
+
+			var enumerable = base.QueryAsync<(short, short, DaysOfWeek, TimesOfDay, string, short)>(sql, new { query.CinemaIds, });
+
+			var results = new List<(short cinemaId, short dayOfYear, DaysOfWeek dayOfWeek, TimesOfDay timeOfDay, string title, short duration)>();
+
+			await foreach (var item in enumerable)
+			{
+				results.Add(item);
+
+				if (query.CinemaIds.Count > 0 && !query.CinemaIds.Contains(cinemaId))
+				{
+					continue;
+				}
+			}
+
+			foreach (var cinema in from r in results
+								   where query.CinemaIds.Contains(r.cinemaId)
+								   select new cinemaType
+								   {
+									   id = r.cinemaId,
+								   })
+			{
+				var films = from r in results
+							where r.cinemaId == 
+			}
+
+			//return base.QueryAsync<cinemaType>("")
+			throw new NotImplementedException();
+		}
 
 		public async Task SaveCinemasAsync(cinemasType cinemas)
 		{

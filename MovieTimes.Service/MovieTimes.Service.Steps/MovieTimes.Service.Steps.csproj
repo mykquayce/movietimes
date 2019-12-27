@@ -15,6 +15,7 @@
     <ProjectReference Include="..\MovieTimes.Service.Clients\MovieTimes.Service.Clients.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Models\MovieTimes.Service.Models.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Repositories\MovieTimes.Service.Repositories.csproj" />
+    <ProjectReference Include="..\MovieTimes.Service.Services\MovieTimes.Service.Services.csproj" />
   </ItemGroup>
 
 </Project>
