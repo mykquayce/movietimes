@@ -32,6 +32,8 @@ services:
     - jaeger
     - mariadb
     secrets:
+    - source: DiscordWebhookId
+    - source: DiscordWebhookToken
     - source: Password
  
   api:
@@ -47,6 +49,12 @@ services:
     - source: Password
 
 secrets:
+  DiscordWebhookId:
+    external: true
+    name: DiscordWebhookId
+  DiscordWebhookToken:
+    external: true
+    name: DiscordWebhookToken
   Password:
     external: true
     name: MySqlCineworldPassword

@@ -1,4 +1,5 @@
 using Helpers.Cineworld.Models;
+using Helpers.Cineworld.Models.Generated;
 using Microsoft.Extensions.Options;
 using Moq;
 using System;
@@ -12,6 +13,7 @@ namespace MovieTimes.Service.Repositories.Tests
 {
 	public class CineworldRepositoryTests
 	{
+		private static readonly XmlSerializerFactory _xmlSerializerFactory = new XmlSerializerFactory();
 		private readonly Repositories.ICineworldRepository _cineworldRepository;
 
 		public CineworldRepositoryTests()
@@ -32,7 +34,7 @@ namespace MovieTimes.Service.Repositories.Tests
 
 		[Theory]
 		[InlineData("2019-08-12T17:53:23Z")]
-		public async Task CineworldRepositoryTests_Logs(string lastModifiedString)
+		public async Task GetLatestLogEntryAsync(string lastModifiedString)
 		{
 			// Arrange
 			var lastModified = DateTime.Parse(lastModifiedString, styles: DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
@@ -54,20 +56,53 @@ namespace MovieTimes.Service.Repositories.Tests
 		}
 
 		[Theory]
-		[InlineData("listings.xml")]
-		public async Task CineworldRepositoryTests_SaveCinemasAsync(string filename)
+		[InlineData("cinemas.xml")]
+		public async Task SaveCinemasAsync(string filename)
 		{
 			// Arrange
 			var path = Path.Combine("Data", filename);
-			var cinemas = DeserializeFile<cinemasType>(path);
+			var cinemas = DeserializeFile<CinemasType>(path);
 
-			// Act
-			await _cineworldRepository.SaveCinemasAsync(cinemas);
+			// Assert
+			Assert.NotNull(cinemas);
+			Assert.NotNull(cinemas.Cinema);
+			Assert.NotEmpty(cinemas.Cinema);
+
+			try
+			{
+				// Act
+				await _cineworldRepository.SaveCinemasAsync(cinemas.Cinema);
+			}
+			catch (Exception ex)
+			{
+				// Assert
+				Assert.True(false, ex.Message);
+			}
+		}
+
+		[Theory]
+		[InlineData(23)]
+		public async Task RunQueryAsync(short cinemaId)
+		{
+			var query = new Query
+			{
+				CinemaIds = { cinemaId, },
+			};
+
+			var count = 0;
+			var results = _cineworldRepository.RunQueryAsync(query);
+
+			await foreach (var result in results)
+			{
+				count++;
+			}
+
+			Assert.InRange(count, 1, int.MaxValue);
 		}
 
 		private static T DeserializeFile<T>(string path)
 		{
-			var serializer = new XmlSerializer(typeof(T));
+			var serializer = _xmlSerializerFactory.CreateSerializer(typeof(T));
 			using var reader = new StreamReader(path);
 			return (T)serializer.Deserialize(reader);
 		}

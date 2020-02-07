@@ -45,24 +45,23 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 
 			if (searchTerms.Count == 0) searchTerms.Add(string.Empty);
 
-			var cinemas = new List<Helpers.Cineworld.Models.cinemaType>();
+			var cinemas = new List<Helpers.Cineworld.Models.Generated.CinemaType>();
 
 			foreach (var searchTerm in from n in searchTerms
 									   where !string.IsNullOrWhiteSpace(n)
 									   select n)
 			{
-				await foreach (var cinema in _cineworldRepository.GetCinemasAsync(searchTerm))
-				{
-					cinemas.Add(cinema);
-				}
+				var asyncEnumerable = _cineworldRepository.GetCinemasAsync(searchTerm);
+
+				cinemas.AddRange(await asyncEnumerable.ToListAsync());
 			}
 
 			return Ok(from c in cinemas
-					  group c by c.id into gg
+					  group c by c.Id into gg
 					  select new
 					  {
 						  id = gg.Key,
-						  gg.First().name,
+						  gg.First().Name,
 					  });
 		}
 	}

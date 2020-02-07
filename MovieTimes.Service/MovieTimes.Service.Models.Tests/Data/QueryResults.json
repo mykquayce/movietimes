@@ -1,0 +1,16 @@
+[
+  {
+    "cinemaId": 23,
+    "cinemaName": "Cineworld Ashton-under-Lyne",
+    "filmTitle": "Like A Boss: Unlimited Screenin",
+    "filmLength": 83,
+    "showDateTime": "2020-01-20T19:45:00"
+  },
+  {
+    "cinemaId": 23,
+    "cinemaName": "Cineworld Ashton-under-Lyne",
+    "filmTitle": "Parasite (UnlimitedScreening)",
+    "filmLength": 132,
+    "showDateTime": "2020-07-24T20:00:00"
+  }
+]

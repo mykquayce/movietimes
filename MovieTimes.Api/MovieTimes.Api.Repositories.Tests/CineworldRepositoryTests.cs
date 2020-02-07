@@ -44,15 +44,15 @@ namespace MovieTimes.Api.Repositories.Tests
 				count++;
 
 				// Assert
-				Assert.Equal(expectedId, actual.id);
-				Assert.Equal(expectedName, actual.name);
+				Assert.Equal(expectedId, actual.Id);
+				Assert.Equal(expectedName, actual.Name);
 			}
 
 			Assert.Equal(1, count);
 		}
 
 		[Theory]
-		[InlineData(new[] { (short)23, }, DaysOfWeek.Monday, TimesOfDay.Morning | TimesOfDay.Afternoon, new[] { "dark", "phoenix", }, 0)]
+		[InlineData(new[] { (short)23, }, DaysOfWeek.Monday, TimesOfDay.Morning | TimesOfDay.Afternoon, new[] { "bad", "boys", }, 0)]
 		public async Task CineworldRepositoryTests_GetShowsAsync(
 			ICollection<short> cinemaIds,
 			DaysOfWeek daysOfWeek,
@@ -73,13 +73,14 @@ namespace MovieTimes.Api.Repositories.Tests
 				// Assert
 				Assert.False(string.IsNullOrWhiteSpace(details.Cinema));
 				Assert.Matches(@"^\S.+\S$", details.Cinema);
-				Assert.InRange(details.DateTime, minDate, maxDate);
-				Assert.Equal(0, details.DateTime.Second);
-				Assert.Equal(0, details.DateTime.Millisecond);
+				Assert.NotNull(details.DateTime);
+				Assert.InRange(details.DateTime!.Value, minDate, maxDate);
+				Assert.Equal(0, details.DateTime!.Value.Second);
+				Assert.Equal(0, details.DateTime!.Value.Millisecond);
 
-				Assert.NotEqual(DaysOfWeek.None, daysOfWeek & Convert(details.DateTime.DayOfWeek));
+				Assert.NotEqual(DaysOfWeek.None, daysOfWeek & Convert(details.DateTime!.Value.DayOfWeek));
 
-				Assert.InRange(details.DateTime.Hour, 6, 18);
+				Assert.InRange(details.DateTime!.Value.Hour, 6, 18);
 
 				Assert.False(string.IsNullOrWhiteSpace(details.Movie));
 				Assert.Matches(@"^\S.+\S$", details.Movie);
@@ -89,7 +90,8 @@ namespace MovieTimes.Api.Repositories.Tests
 
 				Assert.NotEqual(-1, indices.Max());
 
-				Assert.InRange(details.End, details.DateTime.TimeOfDay, details.DateTime.AddHours(5).TimeOfDay);
+				Assert.NotNull(details.End);
+				Assert.InRange(details.End!.Value, details.DateTime!.Value.TimeOfDay, details.DateTime!.Value.AddHours(5).TimeOfDay);
 			}
 
 			Assert.InRange(count, 1, int.MaxValue);

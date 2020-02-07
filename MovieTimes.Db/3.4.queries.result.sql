@@ -3,6 +3,7 @@ CREATE TABLE `queries`.`result` (
   `datetime` DATETIME NOT NULL,
   `queryId` SMALLINT UNSIGNED NOT NULL,
   `json` JSON NOT NULL,
+  `checksum` INT NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY fk_queryId_queries_saved_id(`queryId`)
     REFERENCES `queries`.`saved` (`id`)

@@ -7,14 +7,15 @@
 
   <ItemGroup>
     <PackageReference Include="Dawn.Guard" Version="1.10.0" />
-    <PackageReference Include="Helpers.Cineworld" Version="1.0.7" />
-    <PackageReference Include="WorkflowCore" Version="2.1.2" />
+    <PackageReference Include="Helpers.Cineworld" Version="1.1.5" />
+    <PackageReference Include="System.Interactive.Async" Version="4.0.0" />
+    <PackageReference Include="WorkflowCore" Version="3.1.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MovieTimes.Service.Clients\MovieTimes.Service.Clients.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Models\MovieTimes.Service.Models.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Repositories\MovieTimes.Service.Repositories.csproj" />
+    <ProjectReference Include="..\MovieTimes.Service.Services\MovieTimes.Service.Services.csproj" />
   </ItemGroup>
 
 </Project>

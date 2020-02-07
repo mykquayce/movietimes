@@ -1,6 +1,6 @@
 ﻿using Dawn;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -9,25 +9,31 @@ namespace MovieTimes.Service.Steps
 {
 	public class RunQueryStep : IStepBody
 	{
-		private readonly Clients.IApiClient _apiClient;
+		private readonly Repositories.ICineworldRepository _cineworldRepository;
 
-		public RunQueryStep(Clients.IApiClient apiClient)
+		public RunQueryStep(Repositories.ICineworldRepository cineworldRepository)
 		{
-			_apiClient = Guard.Argument(() => apiClient).NotNull().Value;
+			_cineworldRepository = Guard.Argument(() => cineworldRepository).NotNull().Value;
 		}
 
-		public string? Json { get; set; }
-		public KeyValuePair<short, string>? KeyValuePair { get; set; }
+		public KeyValuePair<short, Helpers.Cineworld.Models.Query>? KeyValuePair { get; set; }
+		public Models.QueryResults? Results { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
 			Guard.Argument(() => KeyValuePair).NotNull();
-			Guard.Argument(() => KeyValuePair!.Value.Key).Positive();
-			Guard.Argument(() => KeyValuePair!.Value.Value).NotNull().NotEmpty().NotWhiteSpace();
+			Guard.Argument(() => KeyValuePair!.Value!.Key).InRange((short)1, short.MaxValue);
+			Guard.Argument(() => KeyValuePair!.Value!.Value).NotNull();
 
-			var relativeUri = new Uri(KeyValuePair!.Value.Value, UriKind.Relative);
+			var id = KeyValuePair!.Value.Key;
+			var query = KeyValuePair!.Value.Value;
 
-			Json = await _apiClient.RunQueryAsync(relativeUri);
+			var queryResults = await _cineworldRepository.RunQueryAsync(query).ToListAsync();
+
+			Results = new Models.QueryResults(queryResults)
+			{
+				QueryId = id,
+			};
 
 			return ExecutionResult.Next();
 		}

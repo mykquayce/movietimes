@@ -1,4 +1,6 @@
 ﻿using Dawn;
+using Helpers.Tracing;
+using OpenTracing;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
@@ -8,20 +10,26 @@ namespace MovieTimes.Service.Steps
 {
 	public class GetQueriesStep : IStepBody
 	{
-		private readonly Repositories.IQueriesRepository _queriesRepository;
+		private readonly Services.IQueriesService _queriesService;
+		private readonly ITracer? _tracer;
 
-		public GetQueriesStep(Repositories.IQueriesRepository queriesRepository)
+		public GetQueriesStep(Services.IQueriesService queriesService, ITracer? tracer)
 		{
-			_queriesRepository = Guard.Argument(() => queriesRepository).NotNull().Value;
+			_queriesService = Guard.Argument(() => queriesService).NotNull().Value;
+			_tracer = tracer;
 		}
 
-		public IDictionary<short, string> Queries { get; } = new Dictionary<short, string>();
+		public IDictionary<short, Helpers.Cineworld.Models.Query> Queries { get; } = new Dictionary<short, Helpers.Cineworld.Models.Query>();
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
-			await foreach (var (id, query) in _queriesRepository.GetQueriesAsync())
+			using var scope = _tracer?.BuildDefaultSpan().StartActive();
+
+			await foreach (var (id, query) in _queriesService.GetQueriesAsync())
 			{
 				Queries.Add(id, query);
+
+				scope?.Span.Log(id, query);
 			}
 
 			return ExecutionResult.Next();

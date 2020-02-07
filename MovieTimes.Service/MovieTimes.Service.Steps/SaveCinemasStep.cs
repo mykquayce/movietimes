@@ -1,5 +1,6 @@
 ﻿using Dawn;
-using Helpers.Cineworld.Models;
+using Helpers.Cineworld.Models.Generated;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -16,7 +17,7 @@ namespace MovieTimes.Service.Steps
 			_cineworldRepository = Guard.Argument(() => cineworldRepository).NotNull().Value;
 		}
 
-		public cinemasType? Cinemas { get; set; }
+		public ICollection<CinemaType>? Cinemas { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{

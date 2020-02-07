@@ -23,7 +23,7 @@ namespace MovieTimes.Api.WebApplication
 			var isDevelopment = env.IsDevelopment();
 
 			_configuration = configuration
-				.AddDockerSecret("DbSettings", "Password", optional: isDevelopment, reloadOnChange: true);
+				.AddDockerSecret("Password", "DbSettings:Password", optional: isDevelopment, reloadOnChange: true);
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.

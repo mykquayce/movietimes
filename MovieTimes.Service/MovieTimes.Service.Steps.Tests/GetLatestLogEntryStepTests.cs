@@ -22,7 +22,7 @@ namespace MovieTimes.Service.Steps.Tests
 
 			var context = Mock.Of<WorkflowCore.Models.StepExecutionContext>();
 
-			var sut = new Steps.GetLatestLogEntryStep(cineworldRepository);
+			var sut = new Steps.GetLatestLogEntryStep(cineworldRepository, default);
 
 			// Act
 			await sut.RunAsync(context);

@@ -1,13 +1,18 @@
 ﻿using Microsoft.Extensions.Options;
 using Moq;
-using System.Collections.Generic;
+using System;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace MovieTimes.Service.Repositories.Tests
 {
-	public class QueriesRepositoryTests
+	public sealed class QueriesRepositoryTests : IDisposable
 	{
+		private readonly Services.ISerializationService _serializationService = new Services.Concrete.JsonSerializationService();
+
 		private readonly IQueriesRepository _repository;
 
 		public QueriesRepositoryTests()
@@ -27,56 +32,102 @@ namespace MovieTimes.Service.Repositories.Tests
 		}
 
 		[Fact]
-		public async Task QueriesRepositoryTests_GetQueriesAsync()
+		public async Task GetQueriesAsync()
 		{
-			var queries = new Dictionary<int, string>();
+			var count = 0;
 
-			await foreach (var (id, query) in _repository.GetQueriesAsync())
+			await foreach (var (id, json) in _repository.GetQueriesAsync())
 			{
-				queries.Add(id, query);
+				count++;
+
+				Assert.InRange(id, 1, int.MaxValue);
+				Assert.NotNull(json);
+				Assert.NotEmpty(json);
 			}
 
-			Assert.Equal(2, queries.Count);
-			Assert.Contains(1, queries.Keys);
-			Assert.Contains(2, queries.Keys);
-			Assert.NotNull(queries[1]);
-			Assert.NotEmpty(queries[1]);
-			Assert.NotNull(queries[2]);
-			Assert.NotEmpty(queries[2]);
+			Assert.InRange(count, 1, int.MaxValue);
 		}
 
-		[Theory]
-		[InlineData(1, "{}")]
-		public async Task QueriesRepositoryTests_SaveQueryResult(short queryId, string json)
+		[Fact]
+		public async Task SaveQueryResultsAsync()
 		{
+			// Arange
+			static DateTime f(string s)
+				=> DateTime.Parse(s, provider: CultureInfo.InvariantCulture, styles: DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal);
+
+			var collection = new Models.QueryResults
+			{
+				{ 23, "Cineworld Ashton-under-Lyne", "Jojo Rabbit", 108, f("2020-01-09T14:45:00Z") },
+				{ 23, "Cineworld Ashton-under-Lyne", "Cats", 109, f("2020-01-09T15:00:00Z") },
+			};
+
+			var json = await SerializeAsync(collection);
+			var checksum = Helpers.Common.ExtensionMethods.GetDeterministicHashCode(json);
+
+			var queryResults = new Models.QueryResults(collection)
+			{
+				Checksum = checksum,
+				Json = json,
+				QueryId = 1,
+			};
+
 			try
 			{
 				// Act
-				await _repository.SaveQueryResult(queryId, json);
+				await _repository.SaveQueryResultsAsync(queryResults);
 			}
-#pragma warning disable CA1031 // Do not catch general exception types
-			catch
-#pragma warning restore CA1031 // Do not catch general exception types
+			catch (Exception ex)
 			{
 				// Assert
-				Assert.True(false);
+				Assert.True(false, ex.Message);
 			}
 		}
 
 		[Theory]
 		[InlineData(1)]
-		public async Task QueriesRepositoryTests_GetLastTwoResultsAsync(short queryId)
+		public async Task GetLastTwoQueryResultsCollectionsAsync(short queryId)
 		{
-			var actual = new List<string>();
+			// Act
+			var resultsCollection = _repository.GetLastTwoQueryResultsCollectionsAsync(queryId);
 
-			await foreach (var result in _repository.GetLastTwoResultsAsync(queryId))
+			await foreach (var results in resultsCollection)
 			{
-				actual.Add(result);
+				// Assert
+				Assert.NotNull(results.QueryId);
+				Assert.InRange(results.QueryId!.Value, 1, int.MaxValue);
+				Assert.NotNull(results.Json);
+				Assert.NotEqual(0, results.Checksum);
 			}
+		}
 
-			Assert.NotNull(actual);
-			Assert.NotEmpty(actual);
-			Assert.InRange(actual.Count, 1, 2);
+		private async Task<string> SerializeAsync<T>(T value)
+		{
+			var stream = await _serializationService.SerializeAsync(value);
+			using var reader = new StreamReader(stream, Encoding.UTF8);
+			return await reader.ReadToEndAsync();
+		}
+
+		#region IDisposable implementation
+		public void Dispose() => _repository?.Dispose();
+		#endregion IDisposable implementation
+	}
+
+	public static class ExtensionMethods
+	{
+		public static Models.QueryResults Add(this Models.QueryResults queryResults, short cinemaId, string cinemaName, string filmTitle, short filmLength, DateTime showDateTime)
+		{
+			var queryResult = new Models.QueryResult
+			{
+				CinemaId = cinemaId,
+				CinemaName = cinemaName,
+				FilmTitle = filmTitle,
+				FilmLength = filmLength,
+				ShowDateTime = showDateTime,
+			};
+
+			queryResults.Add(queryResult);
+
+			return queryResults;
 		}
 	}
 }
