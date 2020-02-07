@@ -1,6 +1,6 @@
 ﻿using Dawn;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -17,21 +17,23 @@ namespace MovieTimes.Service.Steps
 		}
 
 		public KeyValuePair<short, Helpers.Cineworld.Models.Query>? KeyValuePair { get; set; }
-		public ICollection<Helpers.Cineworld.Models.cinemaType> Cinemas { get; } = new List<Helpers.Cineworld.Models.cinemaType>();
-
-		public short QueryId => KeyValuePair!.Value.Key;
-		public Helpers.Cineworld.Models.Query Query => KeyValuePair!.Value.Value;
+		public Models.QueryResults? Results { get; set; }
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
 			Guard.Argument(() => KeyValuePair).NotNull();
-			Guard.Argument(() => QueryId).Positive();
-			Guard.Argument(() => Query).NotNull();
+			Guard.Argument(() => KeyValuePair!.Value!.Key).InRange((short)1, short.MaxValue);
+			Guard.Argument(() => KeyValuePair!.Value!.Value).NotNull();
 
-			await foreach(var cinema in _cineworldRepository.RunQueryAsync(Query))
+			var id = KeyValuePair!.Value.Key;
+			var query = KeyValuePair!.Value.Value;
+
+			var queryResults = await _cineworldRepository.RunQueryAsync(query).ToListAsync();
+
+			Results = new Models.QueryResults(queryResults)
 			{
-				Cinemas.Add(cinema);
-			}
+				QueryId = id,
+			};
 
 			return ExecutionResult.Next();
 		}

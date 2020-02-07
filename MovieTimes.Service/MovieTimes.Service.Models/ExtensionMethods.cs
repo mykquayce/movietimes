@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Helpers.Cineworld.Models.Enums;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace MovieTimes.Service.Models
 {
@@ -9,11 +8,11 @@ namespace MovieTimes.Service.Models
 	{
 		public static IEnumerable<(object key, object value)> Data(this Exception exception)
 		{
-			foreach (var key in exception.Data.Keys)
-			{
-				var value = exception.Data[key];
+			var enumerator = exception.Data.GetEnumerator();
 
-				yield return (key, value);
+			while (enumerator.MoveNext())
+			{
+				yield return (enumerator.Key, enumerator.Value);
 			}
 
 			if (exception.InnerException is null)
@@ -35,6 +34,21 @@ namespace MovieTimes.Service.Models
 			}
 
 			return exception.InnerException.Message();
+		}
+
+		public static DaysOfWeek ToDaysOfWeek(this DayOfWeek dayOfWeek)
+		{
+			return dayOfWeek switch
+			{
+				DayOfWeek.Sunday => DaysOfWeek.Sunday,
+				DayOfWeek.Monday => DaysOfWeek.Monday,
+				DayOfWeek.Tuesday => DaysOfWeek.Tuesday,
+				DayOfWeek.Wednesday => DaysOfWeek.Wednesday,
+				DayOfWeek.Thursday => DaysOfWeek.Thursday,
+				DayOfWeek.Friday => DaysOfWeek.Friday,
+				DayOfWeek.Saturday => DaysOfWeek.Saturday,
+				_ => throw new ArgumentOutOfRangeException(nameof(dayOfWeek), dayOfWeek, $"Unexpected value of {nameof(dayOfWeek)}: {dayOfWeek:G}"),
+			};
 		}
 	}
 }

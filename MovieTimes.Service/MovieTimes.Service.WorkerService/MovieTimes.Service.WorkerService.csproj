@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <Nullable>enable</Nullable>
@@ -7,13 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Helpers.DockerSecrets" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0" />
+    <PackageReference Include="Helpers.Common" Version="1.0.6" />
+    <PackageReference Include="Helpers.Discord" Version="1.0.8" />
+    <PackageReference Include="Helpers.DockerSecrets" Version="1.2.3" />
+    <PackageReference Include="Helpers.Jaeger" Version="1.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.1" />
     <PackageReference Include="OpenTracing" Version="0.12.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MovieTimes.Service.Clients\MovieTimes.Service.Clients.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Configuration\MovieTimes.Service.Configuration.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Models\MovieTimes.Service.Models.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Repositories\MovieTimes.Service.Repositories.csproj" />

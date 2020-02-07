@@ -6,11 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Helpers.Common" Version="1.0.6" />
     <PackageReference Include="Helpers.MySql" Version="1.1.9" />
+    <PackageReference Include="System.Interactive.Async" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MovieTimes.Service.Configuration\MovieTimes.Service.Configuration.csproj" />
     <ProjectReference Include="..\MovieTimes.Service.Models\MovieTimes.Service.Models.csproj" />
   </ItemGroup>
 

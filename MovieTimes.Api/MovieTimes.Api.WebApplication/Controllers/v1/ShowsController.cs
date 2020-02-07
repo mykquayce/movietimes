@@ -15,8 +15,6 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 	[ApiController]
 	public class ShowsController : ControllerBase
 	{
-		private static readonly TimeSpan _padding = TimeSpan.FromMinutes(30);
-
 		private readonly ITracer _tracer;
 		private readonly ILogger _logger;
 		private readonly ICineworldRepository _cineworldRepository;
@@ -61,16 +59,13 @@ namespace MovieTimes.Api.WebApplication.Controllers.v1
 			{
 				await foreach (var cinema in _cineworldRepository.GetCinemasAsync(cinemas))
 				{
-					cinemaIds.Add(cinema.id);
+					cinemaIds.Add(cinema.Id);
 				}
 			}
 
-			var shows = new List<Helpers.Cineworld.Models.CinemaMovieShow>();
-
-			await foreach (var show in _cineworldRepository.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0], weekCount))
-			{
-				shows.Add(show);
-			}
+			var shows = await _cineworldRepository
+				.GetShowsAsync(cinemaIds, daysOfWeek, timesOfDay, searchTerms ?? new string[0], weekCount)
+				.ToListAsync();
 
 			return Ok(from s in shows
 					  orderby s.Cinema, s.DateTime, s.Movie

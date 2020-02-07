@@ -2,14 +2,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace MovieTimes.Service.WorkerService
 {
-	public class Program
+	public static class Program
 	{
+		private const string _userSecretsIdConfigKey = "UserSecrets:Id";
+
 		public static Task Main(string[] args)
 		{
 			var hostBuilder = Host.CreateDefaultBuilder(args);
@@ -17,26 +20,44 @@ namespace MovieTimes.Service.WorkerService
 			hostBuilder
 				.ConfigureAppConfiguration((context, builder) =>
 				{
-					builder.AddDockerSecret("DbSettings", "Password", optional: context.HostingEnvironment.IsDevelopment());
+					var isDevelopment = context.HostingEnvironment.IsDevelopment();
+
+					if (isDevelopment)
+					{
+						var config = builder.Build();
+						var userSecretsId = config.GetValue<string>(_userSecretsIdConfigKey);
+
+						builder
+							.AddUserSecrets(userSecretsId);
+					}
+
+					builder
+						.AddDockerSecret("DiscordWebhookId", "Discord:Webhook:Id", optional: isDevelopment)
+						.AddDockerSecret("DiscordWebhookToken", "Discord:Webhook:Token", optional: isDevelopment)
+						.AddDockerSecret("Password", "DbSettings:Password", optional: isDevelopment);
 				});
 
 			hostBuilder
 				.ConfigureServices((hostContext, services) =>
 				{
+					var uriSettings = hostContext.Configuration
+						.GetSection(nameof(Configuration.Uris))
+						.Get<Configuration.Uris>();
+
+					var jaegerSettings = hostContext.Configuration.GetSection(nameof(Helpers.Jaeger))
+						.GetSection(nameof(Helpers.Jaeger.Models.Settings))
+						.Get<Helpers.Jaeger.Models.Settings>();
+
+					services
+						.AddJaegerTracing(jaegerSettings);
+
 					// http clients
 					services
 						.AddHttpClient(
-							nameof(Clients.Concrete.ApiClient),
+							nameof(Helpers.Discord.Concrete.DiscordClient),
 							(_, client) =>
 							{
-								var uriSettings = hostContext.Configuration
-									.GetSection(nameof(Configuration.Uris))
-									.Get<Configuration.Uris>();
-
-								client.Timeout = TimeSpan.FromSeconds(1);
-								client.BaseAddress = new Uri(uriSettings.ApiBaseUri!, UriKind.Absolute);
-								client.DefaultRequestHeaders.Accept.Clear();
-								client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+								client.BaseAddress = new Uri(uriSettings.DiscordUri!, UriKind.Absolute);
 							})
 						.ConfigurePrimaryHttpMessageHandler(() =>
 						{
@@ -46,12 +67,12 @@ namespace MovieTimes.Service.WorkerService
 					// config
 					services
 						.Configure<Helpers.MySql.Models.DbSettings>(hostContext.Configuration.GetSection(nameof(Helpers.MySql.Models.DbSettings)))
-						.Configure<Configuration.Uris>(hostContext.Configuration.GetSection(nameof(Configuration.Uris)));
+						.Configure<Helpers.Discord.Models.Webhook>(hostContext.Configuration.GetSection(nameof(Helpers.Discord)).GetSection(nameof(Helpers.Discord.Models.Webhook)));
 
 					// clients
 					services
-						.AddTransient<Clients.IApiClient, Clients.Concrete.ApiClient>()
-						.AddTransient<Helpers.Cineworld.ICineworldClient, Helpers.Cineworld.Concrete.CineworldClient>();
+						.AddTransient<Helpers.Cineworld.ICineworldClient, Helpers.Cineworld.Concrete.CineworldClient>()
+						.AddTransient<Helpers.Discord.IDiscordClient, Helpers.Discord.Concrete.DiscordClient>();
 
 					// repos
 					services
@@ -60,18 +81,23 @@ namespace MovieTimes.Service.WorkerService
 
 					// services
 					services
-						.AddTransient<Services.IQueriesService, Services.Concrete.QueriesService>();
+						.AddTransient<Services.IQueriesService, Services.Concrete.QueriesService>()
+						.AddTransient<Services.ISerializationService, Services.Concrete.JsonSerializationService>();
 
 					// steps
 					services
+						.AddTransient<Steps.GetFilmsStep>()
+						.AddTransient<Steps.GetLastTwoQueryResultsCollectionsStep>()
 						.AddTransient<Steps.GetLatestLogEntryStep>()
-						.AddTransient<Steps.GetListingsHeadersStep>()
+						.AddTransient<Steps.GetHeadersStep>()
 						.AddTransient<Steps.GetListingsStep>()
 						.AddTransient<Steps.GetQueriesStep>()
 						.AddTransient<Steps.RunQueryStep>()
 						.AddTransient<Steps.SaveCinemasStep>()
+						.AddTransient<Steps.SaveFilmLengthsStep>()
 						.AddTransient<Steps.SaveLogEntryStep>()
-						.AddTransient<Steps.SaveQueryResultStep>();
+						.AddTransient<Steps.SaveQueryResultsStep>()
+						.AddTransient<Steps.SendMessageToDiscordStep>();
 
 					services
 						.AddWorkflow()

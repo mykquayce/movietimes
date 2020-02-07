@@ -6,11 +6,11 @@ using WorkflowCore.Models;
 
 namespace MovieTimes.Service.Steps
 {
-	public class GetListingsHeadersStep : IStepBody
+	public class GetHeadersStep : IStepBody
 	{
 		private readonly Helpers.Cineworld.ICineworldClient _cineworldClient;
 
-		public GetListingsHeadersStep(
+		public GetHeadersStep(
 			Helpers.Cineworld.ICineworldClient cineworldClient)
 		{
 			_cineworldClient = Guard.Argument(() => cineworldClient).NotNull().Value;
@@ -20,7 +20,7 @@ namespace MovieTimes.Service.Steps
 
 		public async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
 		{
-			LastModified = await _cineworldClient.GetPerformancesLastModifiedDateAsync();
+			LastModified = await _cineworldClient.GetLastModifiedDateAsync();
 
 			return ExecutionResult.Next();
 		}

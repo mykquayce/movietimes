@@ -9,6 +9,11 @@ namespace MovieTimes.Service.Services.Concrete
 	{
 		private readonly Repositories.IQueriesRepository _queriesRepository;
 
+		private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+		{
+			PropertyNameCaseInsensitive = true,
+		};
+
 		public QueriesService(Repositories.IQueriesRepository queriesRepository)
 		{
 			_queriesRepository = Guard.Argument(() => queriesRepository).NotNull().Value;
@@ -16,12 +21,12 @@ namespace MovieTimes.Service.Services.Concrete
 
 		public async IAsyncEnumerable<(short id, Query)> GetQueriesAsync()
 		{
-			await foreach(var (id, json) in _queriesRepository.GetQueriesAsync())
+			await foreach (var (id, json) in _queriesRepository.GetQueriesAsync())
 			{
 				Guard.Argument(() => id).Positive();
 				Guard.Argument(() => json).NotNull().NotEmpty().NotWhiteSpace().StartsWith("{");
 
-				var query = JsonSerializer.Deserialize<Query>(json);
+				var query = JsonSerializer.Deserialize<Query>(json, _jsonSerializerOptions);
 
 				yield return (id, query);
 			}
